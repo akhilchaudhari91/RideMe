@@ -1,0 +1,48 @@
+<resources>
+
+    <!--API URL-->
+    <string name="APIBaseURL">http://ridemecabs.azurewebsites.net/api/</string>
+    <string name="CheckDuplicateEntry">User/CheckDuplicateEntryExists</string>
+    <string name="GetCabDuration">CabDuration/GetCabDurations</string>
+    <string name="RegisterUser">User</string>
+    <string name="ApplyCoupon">UserCoupons/GetActiveCouponsForUser</string>
+    <string name="RideEstimate">RideNow/GetRideEstimates</string>
+    <string name="ConfirmRide">RideNow/ConfirmRide</string>
+
+
+    <string name="app_name">RideMe</string>
+    <string name="shared_preferences_name">UserDetails</string>
+
+    <!--Register Resource Strings-->
+    <string name="prompt_confirmPassword">Confirm Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_Register">Register</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="error_invalid_confirmPassword">Please enter a valid password</string>
+    <string name="error_password_not_match">Passwords do not match</string>
+    <string name="error_required_name">Please enter your name</string>
+    <string name="error_duplicate_email">The Email address is already registered</string>
+    <string name="error_duplicate_contact">The mobile number is already registered</string>
+    <string name="error_invalid_contact_number">Please enter a 10 digit contact number</string>
+    <string name="error_invalid_email">Please enter a valid email adrress</string>
+    <string name="error_invalid_password">Please enter a valid password greater than 4 characters</string>
+    <string name="error_register">There seems to be some issue while registering your account. Please try again</string>
+    <string name="error_internet_connection">You seem to be offline. Please check your internet connection</string>
+    <string name="progress_dialog_duplicateEntry">Checking duplicate entries</string>
+    <string name="progress_dialog_createAccount">Creating your account</string>
+
+    <!--Apply Coupon-->
+    <string name="error_applycoupon">There seems to be some issue while fetching your coupons. Please try again</string>
+
+    <!--Main Activity-->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!--Login Activity-->
+    <string name="title_activity_login">Login</string>
+    <string name="Login">User/AuthenticateUser</string>
+    <string name="action_Login">Login</string>
+    <string name="InvalidCredentials">The username or password is incorrect</string>
+    <string name="error_Login">There seems to be some issue while logging in your account. Please try again</string>
+</resources>

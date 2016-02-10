@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.redcabs.cabapplication.RideEstimate.RideEstimateActivity"
+    android:orientation="vertical"
+    android:background="#FFF">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:minHeight="50dp"
+            android:background="@drawable/bottomborder">
+            <TextView
+                android:text="Pickup"
+                android:minWidth="100dp"
+                android:layout_height="match_parent"
+                android:paddingLeft="20dp"
+                android:layout_span="1"
+                android:gravity="center_vertical"
+                android:textSize="15dp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/txtViewPickupAddress"
+                android:maxLines="3"
+                android:layout_height="match_parent"
+                android:layout_span="2"
+                android:paddingLeft="10dp"
+                android:minWidth="100dp"
+                android:gravity="center_vertical"
+                android:text="N/A" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:minHeight="50dp"
+            android:background="@drawable/bottomborder"
+            android:layout_marginTop="5dp">
+            <TextView
+                android:text="Drop"
+                android:minWidth="100dp"
+                android:width="50dp"
+                android:layout_height="match_parent"
+                android:paddingLeft="20dp"
+                android:layout_span="1"
+                android:textSize="15dp"
+                android:textStyle="bold"
+                android:gravity="center_vertical" />
+            <TextView
+                android:id="@+id/txtViewDropAddress"
+                android:text="N/A"
+                android:maxLines="3"
+                android:layout_span="2"
+                android:layout_height="match_parent"
+                android:paddingLeft="10dp"
+                android:minWidth="100dp"
+                android:gravity="center_vertical"
+                android:width="50dp"/>
+        </TableRow>
+    </TableLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottomborder"
+            android:layout_marginTop="10dp"
+            android:stretchColumns="1">
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:text="Duration"
+                    android:minWidth="100dp"
+                    android:width="50dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="15dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="₹0"
+                    android:id="@+id/txtViewDuration"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:text="Total Distance"
+                    android:minWidth="100dp"
+                    android:width="50dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="15dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="₹0"
+                    android:id="@+id/txtViewTotalDistance"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:text="Base Fare"
+                    android:minWidth="100dp"
+                    android:width="50dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="15dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="₹0"
+                    android:id="@+id/txtViewBaseFare"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+
+                <Spinner
+                    android:minWidth="50dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:id="@+id/spnrNightHalt"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="₹0"
+                    android:id="@+id/txtNightHaltFare"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:text="Coupon"
+                    android:minWidth="100dp"
+                    android:width="50dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="15dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="No coupon selected"
+                    android:id="@+id/txtCouponDiscount"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <TextView
+                    android:text="Service Tax"
+                    android:minWidth="100dp"
+                    android:width="50dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="15dp"
+                    android:textSize="15dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="0%"
+                    android:id="@+id/txtSeriveTax"/>
+            </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="50dp"
+                android:layout_marginTop="5dp">
+                <CheckBox
+                    android:text="Round Trip"
+                    android:minWidth="120dp"
+                    android:textSize="15dp"
+                    android:gravity="center_vertical"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:id="@+id/chkRoundTrip" />
+            </TableRow>
+        </TableLayout>
+        </LinearLayout>
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:text="Total Estimate"
+        android:maxLines="1"
+        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:paddingLeft="10dp"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        android:gravity="center_vertical"/>
+    <TextView
+        android:text="₹0"
+        android:maxLines="1"
+        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:paddingLeft="10dp"
+        android:textSize="15dp"
+        android:gravity="center_vertical"
+        android:id="@+id/txtTotalFare" />
+</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnCloseRideEstimate"
+        android:width="50dp"
+        android:text="Close"
+        android:textSize="15dp"
+        android:textStyle="normal"/>
+        </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,64 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:orientation="horizontal"
+        android:layout_height="50dp">
+    <android.support.v7.widget.Toolbar android:id="@+id/searchPlacesToolbar"
+        android:layout_width="match_parent" android:layout_height="50dp"
+        android:background="@color/common_action_bar_splitter" app:popupTheme="@style/AppTheme.PopupOverlay"
+        android:textColorSecondary="@color/wallet_bright_foreground_disabled_holo_light">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="25dp"
+            android:background="@drawable/linearlayoutroundedcorner">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5px"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/searchicon" />
+            <ridemecabs.Search.ClearableEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:ems="10"
+                android:background="@android:color/transparent"
+                android:layout_marginRight="15px"
+                android:fontFamily="sans-serif"
+                android:hint="Search pickup location"
+                android:textColor="#000000"
+                android:id="@+id/txtSearchPlaces_popup"
+                android:imeActionId="@+id/txtSearchPlaces_popup"
+                android:imeActionLabel="Search"
+                android:maxLines="1"
+                android:imeOptions="actionSearch" android:inputType="textAutoComplete"/>
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+        </LinearLayout>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="20px"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/serachPlaceslist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"/>
+
+        <TextView
+            android:id="@+id/noSearchResult"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="No results found" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="20px"
+    android:id="@+id/layoutCouponList"
+    android:orientation="vertical">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:orientation="vertical"
+        android:layout_height="50dp">
+        <android.support.v7.widget.Toolbar android:id="@+id/applyCouponToolbar"
+            android:layout_width="match_parent" android:layout_height="50dp"
+            android:background="@color/common_action_bar_splitter" app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:textColorSecondary="@color/wallet_bright_foreground_disabled_holo_light">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="25dp"
+                android:background="@drawable/linearlayoutroundedcorner">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5px"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/searchicon" />
+                <ridemecabs.Search.ClearableEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ems="10"
+                    android:background="@android:color/transparent"
+                    android:layout_marginRight="15px"
+                    android:fontFamily="sans-serif"
+                    android:hint="Search your coupons"
+                    android:textColor="#000000"
+                    android:id="@+id/txtApplyCoupon"
+                    android:imeActionId="@+id/txtApplyCoupon"
+                    android:imeActionLabel="Search"
+                    android:maxLines="1"
+                    android:imeOptions="actionSearch" android:inputType="textAutoComplete"/>
+            </LinearLayout>
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
+    <ListView
+        android:id="@+id/list"
+        android:layout_gravity="fill_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/emptyCouponView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:text="No coupons available"
+        android:textColor="#000000" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/layoutNoInternet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20px"
+        android:gravity="center"
+        android:visibility="invisible"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imgNoInternet"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:background="@drawable/nointernet" />
+
+        <TextView
+            android:id="@+id/txtNoInternet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="No internet connection. Tap to retry"
+            android:textColor="#000000" />
+    </LinearLayout>
+
+</LinearLayout>
