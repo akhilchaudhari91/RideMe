@@ -21,6 +21,8 @@ import api.AsyncResponse;
 public class RegisterService {
 
     APIRequestModel apiRequestModel;
+    static APIResponse asyncTaskContact;
+    static APIResponse asyncTaskEmail;
     APIResponse asyncTask;
     List<KeyValue> keyValues;
     final Gson gson = new Gson();
@@ -34,17 +36,19 @@ public class RegisterService {
         this.delegate = delegate;
     }
 
-    public List<KeyValue> CheckIfEmailExists(String email, String requestUrl) {
+    public List<KeyValue> CheckIfEmailExists(String email, String requestUrl, boolean displayProgressBar) {
         keyValues = new ArrayList<>();
-        keyValues.add(new KeyValue("Contact", email));
+        keyValues.add(new KeyValue("Email", email));
 
         apiRequestModel = new APIRequestModel();
+        apiRequestModel.Context = context;
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.RequestUrl = requestUrl;
         apiRequestModel.HttpVerb = "GET";
         apiRequestModel.SetAuthorizationHeader=false;
         apiRequestModel.SetOTPHeader=false;
-        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.DisplayProgressBar=displayProgressBar;
+        apiRequestModel.ProgressDialogMessage="Validating";
         apiRequestModel.Response=new AsyncResponse() {
             @Override
             public void processFinish(String output) {
@@ -53,9 +57,13 @@ public class RegisterService {
         };
 
         try {
-            asyncTask = new APIResponse(apiRequestModel);
+            if(asyncTaskEmail!=null)
+            {
+                asyncTaskEmail.cancel(true);
+            }
+            asyncTaskEmail = new APIResponse(apiRequestModel);
 
-            asyncTask.execute();
+            asyncTaskEmail.execute();
 
 
         } catch (Exception ex) {
@@ -64,17 +72,19 @@ public class RegisterService {
         return keyValues;
     }
 
-    public List<KeyValue> CheckIfContactExists(String contact, String requestUrl) {
+    public List<KeyValue> CheckIfContactExists(String contact, String requestUrl, boolean displayProgressBar) {
         keyValues = new ArrayList<>();
         keyValues.add(new KeyValue("Contact", contact));
 
         apiRequestModel = new APIRequestModel();
+        apiRequestModel.Context = context;
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.RequestUrl = requestUrl;
         apiRequestModel.HttpVerb = "GET";
         apiRequestModel.SetAuthorizationHeader=false;
         apiRequestModel.SetOTPHeader=false;
-        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.DisplayProgressBar=displayProgressBar;
+        apiRequestModel.ProgressDialogMessage="Validating";
         apiRequestModel.Response=new AsyncResponse() {
             @Override
             public void processFinish(String output) {
@@ -83,9 +93,13 @@ public class RegisterService {
         };
 
         try {
-            asyncTask = new APIResponse(apiRequestModel);
+            if(asyncTaskContact!=null)
+            {
+                asyncTaskContact.cancel(true);
+            }
+            asyncTaskContact = new APIResponse(apiRequestModel);
 
-            asyncTask.execute();
+            asyncTaskContact.execute();
 
 
         } catch (Exception ex) {

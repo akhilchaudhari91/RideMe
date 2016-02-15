@@ -1,22 +1,18 @@
 package ridemecabs.Register;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.v4.app.LoaderManager;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,13 +24,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import Entity.KeyValue;
 import Entity.User;
-import Entity.UserDetails;
 import Infrastructure.ConnectionDetector;
 import Infrastructure.MD5;
 import Services.Enum.DuplicateEntryStatus;
@@ -44,7 +34,7 @@ import Services.Register.RegisterService;
 import ridemecabs.Main.MainActivity;
 import ridemecabs.SplashScreen.SplashScreenActivity;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity{
 
     User user = null;
     Context context;
@@ -81,6 +71,8 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                     if (id == R.id.registerConfirmPassword || id == EditorInfo.IME_NULL) {
+                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(textView.getWindowToken(), 0);
                         CheckValidations();
                         return true;
                     }
@@ -92,7 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (!hasFocus) {
                         isDuplicateContact = DuplicateEntryStatus.NotVerified;
-                       CheckDuplicateContact();
+                        CheckDuplicateContact(false);
                     }
                 }
             });
@@ -102,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (!hasFocus) {
                         isDuplicateEmail = DuplicateEntryStatus.NotVerified;
-                        CheckDuplicateEmail();
+                        CheckDuplicateEmail(false);
                     }
                 }
             });
@@ -128,14 +120,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         try {
             int counter = 0;
-            while (counter < 30 && ((isDuplicateContact == DuplicateEntryStatus.Error || isDuplicateContact == DuplicateEntryStatus.NotVerified)
-                    && (isDuplicateEmail == DuplicateEntryStatus.Error || isDuplicateEmail == DuplicateEntryStatus.NotVerified))) {
+            while (counter < 30 && ((isDuplicateContact == DuplicateEntryStatus.NotVerified || isDuplicateEmail == DuplicateEntryStatus.NotVerified))) {
                 Thread.sleep(1000);
                 counter++;
             }
-        }
-        catch (InterruptedException ex)
-        {
+        } catch (InterruptedException ex) {
             Log.d("Duplicate entry", ex.getMessage());
         }
 
@@ -144,38 +133,38 @@ public class RegisterActivity extends AppCompatActivity {
         String contactNo = mContactView.getText().toString();
         String customerName = mCustomerNameView.getText().toString();
 
-            user = new User();
-            user.Name = customerName;
-            user.Email = email;
-            user.ContactNo = contactNo;
-            user.LastLocation = "";
-            user.IsActive = true;
+        user = new User();
+        user.Name = customerName;
+        user.Email = email;
+        user.ContactNo = contactNo;
+        user.LastLocation = "";
+        user.IsActive = true;
 
-            try {
-                user.Password = MD5.crypt(password);
+        try {
+            user.Password = MD5.crypt(password);
 
-                String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.RegisterUser);
+            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.RegisterUser);
 
-               new RegisterService(context, new IUserServiceResponse() {
-                   @Override
-                   public void processFinish(String response) {
-                       try {
-                           JSONObject obj = new JSONObject(response);
-                           user.AccessToken = obj.getString("accessToken").toString();
-                           user.Id = Integer.parseInt(obj.getString("id").toString());
+            new RegisterService(context, new IUserServiceResponse() {
+                @Override
+                public void processFinish(String response) {
+                    try {
+                        if(!TextUtils.isEmpty(response)) {
+                            JSONObject obj = new JSONObject(response);
+                            user.AccessToken = obj.getString("accessToken").toString();
+                            user.Id = Integer.parseInt(obj.getString("id").toString());
+                        }
 
-                           AsyncTaskResult(user);
-                       }
-                       catch (JSONException ex)
-                       {
-                           Log.d("Registration response: ",ex.getMessage());
-                       }
-                   }
-               }).RegisterUser(user, requestUrl);
+                        AsyncTaskResult(user);
+                    } catch (JSONException ex) {
+                        Log.d("Registration response: ", ex.getMessage());
+                    }
+                }
+            }).RegisterUser(user, requestUrl);
 
-            } catch (Exception ex) {
-                Log.d("RegisterActivity", ex.getMessage());
-            }
+        } catch (Exception ex) {
+            Log.d("RegisterActivity", ex.getMessage());
+        }
     }
 
     private boolean CheckValidations() {
@@ -229,31 +218,23 @@ public class RegisterActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        if(isDuplicateEmail==DuplicateEntryStatus.True)
-        {
+        if (isDuplicateEmail == DuplicateEntryStatus.True) {
             focusView = mEmailView;
-            cancel=true;
+            cancel = true;
         }
-        if(isDuplicateContact==DuplicateEntryStatus.True)
-        {
+        if (isDuplicateContact == DuplicateEntryStatus.True) {
             focusView = mContactView;
-            cancel=true;
+            cancel = true;
         }
         if (cancel) {
             focusView.requestFocus();
-        }
-        else
-        {
-            if(isDuplicateContact==DuplicateEntryStatus.Error || isDuplicateContact==DuplicateEntryStatus.NotVerified ||
-                isDuplicateEmail==DuplicateEntryStatus.Error || isDuplicateEmail==DuplicateEntryStatus.NotVerified )
-            {
-                CheckDuplicateContact();
-                CheckDuplicateEmail();
+        } else {
+            if (isDuplicateContact == DuplicateEntryStatus.Error || isDuplicateContact == DuplicateEntryStatus.NotVerified ||
+                    isDuplicateEmail == DuplicateEntryStatus.Error || isDuplicateEmail == DuplicateEntryStatus.NotVerified) {
+                CheckDuplicateContact(true);
+                CheckDuplicateEmail(true);
             }
-            else
-            {
                 attemptRegister();
-            }
         }
         return cancel;
     }
@@ -293,53 +274,41 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void CheckDuplicateContact()
-    {
+    private void CheckDuplicateContact(boolean displayProgressBar) {
         String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.CheckIfContactExists);
         new RegisterService(context, new IUserServiceResponse() {
             @Override
             public void processFinish(String response) {
-                if(TextUtils.isEmpty(response))
-                {
+                if (TextUtils.isEmpty(response)) {
                     isDuplicateContact = DuplicateEntryStatus.Error;
-                }
-                else {
+                } else {
                     isDuplicateContact = DuplicateEntryStatus.getEnum(Integer.parseInt(response));
-                    if(isDuplicateContact==DuplicateEntryStatus.True)
-                    {
+                    if (isDuplicateContact == DuplicateEntryStatus.True) {
                         mContactView.setError(getString(R.string.error_duplicate_contact));
-                    }
-                    else
-                    {
+                    } else {
                         mContactView.setError(null);
                     }
                 }
             }
-        }).CheckIfContactExists(mContactView.getText().toString(), requestUrl);
+        }).CheckIfContactExists(mContactView.getText().toString(), requestUrl, displayProgressBar);
     }
 
-    private void CheckDuplicateEmail()
-    {
+    private void CheckDuplicateEmail(boolean displayProgressBar) {
         String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.CheckIfEmailExists);
         new RegisterService(context, new IUserServiceResponse() {
             @Override
             public void processFinish(String response) {
-                if(TextUtils.isEmpty(response))
-                {
+                if (TextUtils.isEmpty(response)) {
                     isDuplicateEmail = DuplicateEntryStatus.Error;
-                }
-                else {
+                } else {
                     isDuplicateEmail = DuplicateEntryStatus.getEnum(Integer.parseInt(response));
-                    if(isDuplicateEmail==DuplicateEntryStatus.True)
-                    {
+                    if (isDuplicateEmail == DuplicateEntryStatus.True) {
                         mEmailView.setError(getString(R.string.error_duplicate_email));
-                    }
-                    else
-                    {
+                    } else {
                         mEmailView.setError(null);
                     }
                 }
             }
-        }).CheckIfEmailExists(mEmailView.getText().toString(), requestUrl);
+        }).CheckIfEmailExists(mEmailView.getText().toString(), requestUrl, displayProgressBar);
     }
 }

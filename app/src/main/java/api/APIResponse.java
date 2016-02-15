@@ -42,7 +42,7 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mLoadingDialog == null) {
+                    if (mLoadingDialog == null) {
                     mLoadingDialog = ProgressDialog.show(model.Context, model.ProgressDialogTitle,model.ProgressDialogMessage);
                 }
                 mLoadingDialog.setTitle(model.ProgressDialogTitle);
@@ -56,7 +56,7 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
         mHandler.post(new Runnable() { //Make sure it happens in sequence after showLoadingDialog
             @Override
             public void run() {
-                if (mLoadingDialog != null && --progressCount==0) {
+                if (mLoadingDialog != null && --progressCount>=0) {
                     mLoadingDialog.dismiss();
                 }
             }
