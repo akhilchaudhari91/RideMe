@@ -6,6 +6,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -18,6 +23,7 @@ import java.util.List;
 import Entity.KeyValue;
 import Entity.UserDetails;
 import Infrastructure.ConnectionDetector;
+import Services.Enum.EnumSharedPreferences;
 import Services.Login.LoginService;
 import Services.Register.IUserServiceResponse;
 import Services.Register.RegisterService;
@@ -40,33 +46,34 @@ public class SplashScreenActivity extends BaseAppCompatActivity {
         context = this;
 
         SharedPreferences settings = getSharedPreferences(getResources().getString(R.string.shared_preferences_name), 0);
-        final UserDetails userDetails = gson.fromJson(settings.getString("UserDetails", null), UserDetails.class);
+        final UserDetails userDetails = gson.fromJson(settings.getString(EnumSharedPreferences.UserDetails.toString(), null), UserDetails.class);
         String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.Login);
 
 
-            if (userDetails!=null) {
+        setContentView(R.layout.activity_splash_screen);
+        Animation fadeIn = new AlphaAnimation(0,1);
+        fadeIn.setInterpolator(new DecelerateInterpolator()); // add this
+        fadeIn.setDuration(500);
+        fadeIn.start();
 
+        findViewById(R.id.imgLogoSplashscreen).setAnimation(fadeIn);
+            if (userDetails!=null) {
                 new LoginService(context, new IUserServiceResponse() {
                     @Override
                     public void processFinish(String response) {
                         UserDetails userDetails =gson.fromJson(response, UserDetails.class);
                         if(userDetails!=null) {
-                            if (userDetails.Id > 0) {
-                                SharedPreferences settings = getSharedPreferences(getResources().getString(R.string.shared_preferences_name), 0);
+                                SharedPreferences settings = getSharedPreferences(EnumSharedPreferences.UserDetails.toString(), 0);
                                 SharedPreferences.Editor editor = settings.edit();
-                                editor.putString("UserDetails", gson.toJson(userDetails));
+                                editor.putString(EnumSharedPreferences.UserDetails.toString(), gson.toJson(userDetails));
 
                                 // Commit the edits!
                                 editor.commit();
 
                                 setContentView(R.layout.activity_main);
                                 Intent intent = new Intent(context, MainActivity.class);
-                                intent.putExtra("UserDetails",gson.toJson(userDetails));
+                                intent.putExtra(EnumSharedPreferences.UserDetails.toString(),gson.toJson(userDetails));
                                 startActivity(intent);
-
-                            } else {
-                                Toast.makeText(context, getString(R.string.InvalidCredentials), Toast.LENGTH_LONG).show();
-                            }
                         }
                         else
                         {
@@ -85,7 +92,6 @@ public class SplashScreenActivity extends BaseAppCompatActivity {
                 }).AuthenticateUser(userDetails.Email, userDetails.Password, requestUrl);
 
             } else {
-                setContentView(R.layout.activity_splash_screen);
                 Button btnLogin = (Button) findViewById(R.id.btnLogin);
                 Button btnRegister = (Button) findViewById(R.id.btnRegister);
 

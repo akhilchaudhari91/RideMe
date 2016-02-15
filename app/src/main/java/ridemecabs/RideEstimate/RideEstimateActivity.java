@@ -41,18 +41,6 @@ public class RideEstimateActivity extends AppCompatActivity {
         intent = getIntent();
         model = (RideNowModel) intent.getSerializableExtra("rideNowDetails");
 
-        asyncTask = new APIResponse(this, new AsyncResponse() {
-            @Override
-            public void processFinish(String output) {
-                try {
-                    model = gson.fromJson(output, RideNowModel.class);
-                    ShowRideEstimate();
-                } catch (Exception ex) {
-                    Log.d("Get fare estimate", ex.getMessage());
-                }
-            }
-        }, "", "Calculating estimates");
-
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,8 +56,25 @@ public class RideEstimateActivity extends AppCompatActivity {
         apiRequestModel.RequestUrl = getString(R.string.APIBaseURL) + getString(R.string.RideEstimate);
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.SetAuthorizationHeader=false;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage = "Calculating estimates";
+        apiRequestModel.Response=new AsyncResponse() {
+            @Override
+            public void processFinish(String output) {
+                try {
+                    model = gson.fromJson(output, RideNowModel.class);
+                    ShowRideEstimate();
+                } catch (Exception ex) {
+                    Log.d("Get fare estimate", ex.getMessage());
+                }
+            }
+        };
 
-        asyncTask.execute(apiRequestModel);
+        asyncTask = new APIResponse(apiRequestModel);
+        asyncTask.execute();
     }
     private void ShowRideEstimate()
     {

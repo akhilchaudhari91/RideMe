@@ -39,15 +39,21 @@ public class LoginService {
         apiRequestModel.KeyValuePair.add(new KeyValue("Username",email));
         apiRequestModel.KeyValuePair.add(new KeyValue("Password",password));
 
-        asyncTask =   new APIResponse(context, new AsyncResponse() {
+        apiRequestModel.SetAuthorizationHeader=true;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=true;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage="Signing in";
+        apiRequestModel.Response = new AsyncResponse() {
             @Override
             public void processFinish(String output) {
                 delegate.processFinish(output);
             }
-        },"","Logging in");
+        };
+        asyncTask = new APIResponse(apiRequestModel);
 
         try {
-            asyncTask.execute(apiRequestModel);
+            asyncTask.execute();
         } catch (Exception ex) {
             Log.d("Login: ", ex.getMessage());
         }

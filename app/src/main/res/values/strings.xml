@@ -1,10 +1,11 @@
 <resources>
 
     <!--API URL-->
-    <string name="APIBaseURL">http://ridemecabs.azurewebsites.net/api/</string>
-    <string name="CheckDuplicateEntry">User/CheckDuplicateEntryExists</string>
+    <string name="APIBaseURL">https://ridemecabs.azurewebsites.net/api/</string>
+    <string name="CheckIfContactExists">User/CheckIfContactExists</string>
+    <string name="CheckIfEmailExists">User/CheckIfEmailExists</string>
     <string name="GetCabDuration">CabDuration/GetCabDurations</string>
-    <string name="RegisterUser">User</string>
+    <string name="RegisterUser">User/Post</string>
     <string name="ApplyCoupon">UserCoupons/GetActiveCouponsForUser</string>
     <string name="RideEstimate">RideNow/GetRideEstimates</string>
     <string name="ConfirmRide">RideNow/ConfirmRide</string>

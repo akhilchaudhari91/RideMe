@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -69,7 +68,7 @@ import ridemecabs.ApplyCoupon.ListView;
 import ridemecabs.Exception.BaseAppCompatActivity;
 
 public class MainActivity extends BaseAppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
     LocationHelper locationHelper;
@@ -109,9 +108,9 @@ public class MainActivity extends BaseAppCompatActivity
     SearchPlacesHelper searchPlacesHelper;
 
     @Override
-    protected void attachBaseContext(Context base)
-    {
-        super.attachBaseContext(base); MultiDex.install(this);
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     @Override
@@ -123,12 +122,12 @@ public class MainActivity extends BaseAppCompatActivity
             context = this;
             locationHelper = new LocationHelper(context);
 
-            rideNowDetails= (RideNowModel)this.getIntent().getSerializableExtra("rideNowDetails");
-            if(rideNowDetails==null) {
+            rideNowDetails = (RideNowModel) this.getIntent().getSerializableExtra("rideNowDetails");
+            if (rideNowDetails == null) {
                 rideNowDetails = new RideNowModel();
             }
 
-            rideNowDetails.userDetails = gson.fromJson(this.getIntent().getSerializableExtra("UserDetails").toString(),UserDetails.class);
+            rideNowDetails.userDetails = gson.fromJson(this.getIntent().getSerializableExtra("UserDetails").toString(), UserDetails.class);
 
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -156,11 +155,11 @@ public class MainActivity extends BaseAppCompatActivity
             imgApplyCoupon = (ImageView) findViewById(R.id.imgApplyCoupon);
             TextView txtFareEstimate = (TextView) findViewById(R.id.txtViewFareEstimate);
             txtSearchPlaces = (TextView) findViewById(R.id.txtSearchPlaces);
-            txtRideEstimate = ((TextView)findViewById(R.id.txtViewFareEstimate));
-            layoutDriverDetails = ((LinearLayout)findViewById(R.id.layoutDriverDetails));
-            layoutRide = ((LinearLayout)findViewById(R.id.layoutRide));
-            layoutCancelRide= ((LinearLayout)findViewById(R.id.layoutCancelRide));
-            layoutSearchAddress= ((LinearLayout)findViewById(R.id.layoutSearchAddress));
+            txtRideEstimate = ((TextView) findViewById(R.id.txtViewFareEstimate));
+            layoutDriverDetails = ((LinearLayout) findViewById(R.id.layoutDriverDetails));
+            layoutRide = ((LinearLayout) findViewById(R.id.layoutRide));
+            layoutCancelRide = ((LinearLayout) findViewById(R.id.layoutCancelRide));
+            layoutSearchAddress = ((LinearLayout) findViewById(R.id.layoutSearchAddress));
 
             imgViewMini.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -187,7 +186,7 @@ public class MainActivity extends BaseAppCompatActivity
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context, ListView.class);
-                    intent.putExtra("rideNowDetails",rideNowDetails);
+                    intent.putExtra("rideNowDetails", rideNowDetails);
                     startActivity(intent);
                 }
             });
@@ -203,10 +202,8 @@ public class MainActivity extends BaseAppCompatActivity
                     intent.putExtra("calculateFareEstimate", true);
                     try {
                         startActivity(intent);
-                    }
-                    catch(Exception ex)
-                    {
-                        Log.d("Activity",ex.getMessage());
+                    } catch (Exception ex) {
+                        Log.d("Activity", ex.getMessage());
                     }
                 }
             });
@@ -222,20 +219,16 @@ public class MainActivity extends BaseAppCompatActivity
                     intent.putExtra("calculateFareEstimate", false);
                     try {
                         startActivity(intent);
-                    }
-                    catch(Exception ex)
-                    {
-                        Log.d("Activity",ex.getMessage());
+                    } catch (Exception ex) {
+                        Log.d("Activity", ex.getMessage());
                     }
                 }
             });
 
 
             CheckInternetConnectivity();
-        }
-        catch (Exception ex)
-        {
-            Log.d("h",ex.getMessage());
+        } catch (Exception ex) {
+            Log.d("h", ex.getMessage());
         }
     }
 
@@ -264,17 +257,16 @@ public class MainActivity extends BaseAppCompatActivity
     }
 
     @Override
-    protected void onNewIntent(Intent intent)
-    {
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
 
-        rideNowDetails= (RideNowModel)intent.getSerializableExtra("rideNowDetails");
-        if(!TextUtils.isEmpty(rideNowDetails.SourceLocation.Address)) {
+        rideNowDetails = (RideNowModel) intent.getSerializableExtra("rideNowDetails");
+        if (!TextUtils.isEmpty(rideNowDetails.SourceLocation.Address)) {
             txtSearchPlaces.setText(rideNowDetails.SourceLocation.Address);
         }
 
-        if(rideNowDetails.SourceLocation.Latitude!=0 && rideNowDetails.SourceLocation.Longitude!=0) {
+        if (rideNowDetails.SourceLocation.Latitude != 0 && rideNowDetails.SourceLocation.Longitude != 0) {
             UpdateCabDurations(cabType);
             if (myLocationMarker != null) {
                 myLocationMarker.remove();
@@ -287,9 +279,8 @@ public class MainActivity extends BaseAppCompatActivity
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
             mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
         }
-        if(rideNowDetails.RideEstimate.TotalFare>0)
-        {
-            txtRideEstimate.setText("₹"+ Double.toString(rideNowDetails.RideEstimate.TotalFare));
+        if (rideNowDetails.RideEstimate.TotalFare > 0) {
+            txtRideEstimate.setText("₹" + Double.toString(rideNowDetails.RideEstimate.TotalFare));
         }
 
     }
@@ -317,17 +308,14 @@ public class MainActivity extends BaseAppCompatActivity
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         googleMap.setPadding(0, 0, 0, 450);
         try {
             mMap.setMyLocationEnabled(true);
-        }
-        catch (SecurityException ex)
-        {
-            Log.d("My Location",ex.getMessage());
+        } catch (SecurityException ex) {
+            Log.d("My Location", ex.getMessage());
         }
 
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
@@ -361,13 +349,12 @@ public class MainActivity extends BaseAppCompatActivity
             }
         });
 
-        if(locationHelper.canGetLocation())
-        {
-            if(rideNowDetails.SourceLocation.Latitude==0) {
+        if (locationHelper.canGetLocation()) {
+            if (rideNowDetails.SourceLocation.Latitude == 0) {
                 rideNowDetails.SourceLocation.SetLocationDetailsModel(locationHelper.getLocation());
             }
 
-            if(rideNowDetails.SourceLocation.Latitude!=0) {
+            if (rideNowDetails.SourceLocation.Latitude != 0) {
                 final LatLng latlng
                         = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
 
@@ -379,11 +366,11 @@ public class MainActivity extends BaseAppCompatActivity
                     }
                 }).execute();
 
-                if(myLocationMarker!=null) {
+                if (myLocationMarker != null) {
                     myLocationMarker.remove();
                 }
-                    myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-                    myLocationMarker.setVisible(true);
+                myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+                myLocationMarker.setVisible(true);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
                 mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
                 UpdateCabDurations("Mini");
@@ -391,8 +378,7 @@ public class MainActivity extends BaseAppCompatActivity
         }
     }
 
-    private void CheckInternetConnectivity()
-    {
+    private void CheckInternetConnectivity() {
         noConnectionRunnable = new Runnable() {
             public void run() {
                 ShowInternetConnectionSnackBar();
@@ -401,15 +387,14 @@ public class MainActivity extends BaseAppCompatActivity
         noConnectionRunnable.run();
     }
 
-    private void ShowInternetConnectionSnackBar()
-    {
+    private void ShowInternetConnectionSnackBar() {
         try {
             if (!new ConnectionDetector(this).execute().get()) {
-                displayCabMarkers=true;
+                displayCabMarkers = true;
                 if (noInternetSnackBar == null) {
                     layoutImageView.setVisibility(View.INVISIBLE);
                     noInternetSnackBarLayout.setVisibility(View.VISIBLE);
-                    noInternetSnackBar = createSnackBar(noInternetSnackBarLayout, "No Internet Connection", noInternetSnackBar,false);
+                    noInternetSnackBar = createSnackBar(noInternetSnackBarLayout, "No Internet Connection", noInternetSnackBar, false);
                 }
                 if (noLocationServiceSnackBar != null) {
                     noLocationServiceSnackBar.dismiss();
@@ -417,16 +402,14 @@ public class MainActivity extends BaseAppCompatActivity
                     noLocationServiceSnackBar = null;
                 }
 
-            } else
-            {
+            } else {
                 if (noInternetSnackBar != null) {
                     noInternetSnackBar.dismiss();
                     noInternetSnackBar = null;
                     noInternetSnackBarLayout.setVisibility(View.GONE);
                 }
-                if(!locationHelper.canGetLocation())
-                {
-                    if(!displayCabMarkers) {
+                if (!locationHelper.canGetLocation()) {
+                    if (!displayCabMarkers) {
                         if (noLocationServiceSnackBar != null) {
                             noLocationServiceSnackBar.dismiss();
                             noLocationSnackBarLayout.setVisibility(View.GONE);
@@ -435,12 +418,10 @@ public class MainActivity extends BaseAppCompatActivity
                     }
                     noLocationSnackBarLayout.setVisibility(View.VISIBLE);
                     layoutImageView.setVisibility(View.INVISIBLE);
-                    noLocationServiceSnackBar = createSnackBar(noLocationSnackBarLayout,"Enable Location Services", noLocationServiceSnackBar,true);
-                    displayCabMarkers=true;
-                }
-                else
-                {
-                    if(rideNowDetails.RideStatus==0 || rideNowDetails.RideStatus==1) {
+                    noLocationServiceSnackBar = createSnackBar(noLocationSnackBarLayout, "Enable Location Services", noLocationServiceSnackBar, true);
+                    displayCabMarkers = true;
+                } else {
+                    if (rideNowDetails.RideStatus == 0 || rideNowDetails.RideStatus == 1) {
                         layoutCancelRide.setVisibility(View.GONE);
                         layoutSearchAddress.setVisibility(View.VISIBLE);
                         if (displayCabMarkers) {
@@ -456,26 +437,21 @@ public class MainActivity extends BaseAppCompatActivity
                     }
                 }
             }
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             Log.d("Connection Detector", ex.getMessage());
         }
         noConnectionHandler.postDelayed(noConnectionRunnable, 5000);
     }
 
-    private Snackbar createSnackBar(CoordinatorLayout layout,String messageText, Snackbar existingSnackBar, boolean includeEnableAction)
-    {
+    private Snackbar createSnackBar(CoordinatorLayout layout, String messageText, Snackbar existingSnackBar, boolean includeEnableAction) {
         Snackbar snackBar;
-        if(existingSnackBar==null) {
+        if (existingSnackBar == null) {
             snackBar = Snackbar.make(layout, "", Snackbar.LENGTH_INDEFINITE);
-        }
-        else
-        {
-            snackBar=existingSnackBar;
+        } else {
+            snackBar = existingSnackBar;
         }
 
-        if(includeEnableAction) {
+        if (includeEnableAction) {
             snackBar.setAction("ENABLE", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -491,23 +467,21 @@ public class MainActivity extends BaseAppCompatActivity
         snackBar.show();
         ((android.support.design.widget.CoordinatorLayout.LayoutParams) snackBar.getView().getLayoutParams()).setBehavior(null);
 
-        return  snackBar;
+        return snackBar;
     }
 
-    private void expandOrCollapse(final View v,String exp_or_colpse) {
+    private void expandOrCollapse(final View v, String exp_or_colpse) {
         TranslateAnimation anim;
-        if(exp_or_colpse.equals("expand"))
-        {
-            anim = new TranslateAnimation(0.0f, 0.0f,-v.getHeight(), 0.0f);
+        if (exp_or_colpse.equals("expand")) {
+            anim = new TranslateAnimation(0.0f, 0.0f, -v.getHeight(), 0.0f);
             v.setVisibility(View.VISIBLE);
 
             anim.setDuration(750);
             anim.setInterpolator(new AccelerateInterpolator(0.5f));
             v.startAnimation(anim);
-        }
-        else{
-            anim = new TranslateAnimation(0.0f, 0.0f, 0.0f,-v.getHeight());
-            Animation.AnimationListener collapselistener= new Animation.AnimationListener() {
+        } else {
+            anim = new TranslateAnimation(0.0f, 0.0f, 0.0f, -v.getHeight());
+            Animation.AnimationListener collapselistener = new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                 }
@@ -530,25 +504,21 @@ public class MainActivity extends BaseAppCompatActivity
         }
     }
 
-    private void UpdateCabDurations(final String cabType)
-    {
+    private void UpdateCabDurations(final String cabType) {
         try {
             cabDurationRunnable = new Runnable() {
                 public void run() {
-                    getCabDurations(cabType,rideNowDetails.Driver.DriverId);
+                    getCabDurations(cabType, rideNowDetails.Driver.DriverId);
 
                 }
             };
             cabDurationRunnable.run();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Log.d("f", ex.getMessage());
         }
     }
 
-    private void getCabDurations(final String cabType, final int driverId)
-    {
+    private void getCabDurations(final String cabType, final int driverId) {
         try {
             String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.GetCabDuration);
             //duration = mapService.UpdateCabDuration(requestUrl, location.getLatitude(), location.getLongitude());
@@ -559,19 +529,25 @@ public class MainActivity extends BaseAppCompatActivity
 
             CabDuration[] cabDurations = null;
             keyValues = new ArrayList<KeyValue>();
-            keyValues.add(new KeyValue("latitude",  Double.toString(rideNowDetails.SourceLocation.Latitude)));
-            keyValues.add(new KeyValue("longitude",  Double.toString(rideNowDetails.SourceLocation.Longitude)));
-            keyValues.add(new KeyValue("driverId",  Integer.toString(driverId)));
+            keyValues.add(new KeyValue("latitude", Double.toString(rideNowDetails.SourceLocation.Latitude)));
+            keyValues.add(new KeyValue("longitude", Double.toString(rideNowDetails.SourceLocation.Longitude)));
+            keyValues.add(new KeyValue("driverId", Integer.toString(driverId)));
 
             apiRequestModel = new APIRequestModel();
             apiRequestModel.KeyValuePair = keyValues;
             apiRequestModel.RequestUrl = requestUrl;
-            apiRequestModel.HttpVerb="GET";
+            apiRequestModel.HttpVerb = "GET";
 
-            asyncTask = new APIResponse(context, null,"","");
+            apiRequestModel.SetAuthorizationHeader = true;
+            apiRequestModel.SetOTPHeader = false;
+            apiRequestModel.DisplayProgressBar = false;
+            apiRequestModel.ProgressDialogTitle = "";
+            apiRequestModel.ProgressDialogMessage = "";
+
+            asyncTask = new APIResponse(apiRequestModel);
 
             try {
-                String APIResponse = asyncTask.execute(apiRequestModel).get();
+                String APIResponse = asyncTask.execute().get();
                 gson = new Gson();
                 duration = gson.fromJson(APIResponse, CabDuration[].class);
             } catch (Exception ex) {
@@ -579,34 +555,30 @@ public class MainActivity extends BaseAppCompatActivity
             }
 
             displayCabMarkers(duration, cabType);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             Log.d("GetCabDurations", ex.getMessage());
         }
         cabDurationHandler.postDelayed(cabDurationRunnable, 30000);
     }
 
-    private void displayCabMarkers(CabDuration[] cabDurations, String cabType)
-    {
-        this.cabType = cabType==null?"Mini":cabType;
-        if (cabDurations != null && duration.length>0) {
+    private void displayCabMarkers(CabDuration[] cabDurations, String cabType) {
+        this.cabType = cabType == null ? "Mini" : cabType;
+        if (cabDurations != null && duration.length > 0) {
             for (CabDuration cab : cabDurations) {
                 if (cab.CarType.equals(cabType)) {
                     mMap.clear();
                     final LatLng latlng
                             = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
-                    if(myLocationMarker!=null)
-                    {
-                     myLocationMarker.remove();
+                    if (myLocationMarker != null) {
+                        myLocationMarker.remove();
                     }
-                        myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-                        myLocationMarker.setVisible(true);
+                    myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+                    myLocationMarker.setVisible(true);
                     for (String location : cab.Drivers) {
                         mMap.addMarker(new MarkerOptions().position(UIHelper.GetLatLngPosition(location)).title(cab.CarType).icon(BitmapDescriptorFactory.fromResource(R.drawable.mini)));
                     }
-                        if (rideNowDetails.RideStatus == 0 || rideNowDetails.RideStatus == 1) {
-                            if (cab.DurationValue != 0) {
+                    if (rideNowDetails.RideStatus == 0 || rideNowDetails.RideStatus == 1) {
+                        if (cab.DurationValue != 0) {
                             txtViewCabDuration.setText(cab.DurationText);
                             layoutImageView.setVisibility(View.VISIBLE);
                             if (noLocationServiceSnackBar != null) {
@@ -619,31 +591,31 @@ public class MainActivity extends BaseAppCompatActivity
                     }
                 }
             }
-        }
-        else {
+        } else {
             txtViewCabDuration.setText("No cabs");
         }
     }
 
-    public void ShowConfirmation(View view){
+    public void ShowConfirmation(View view) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("Confirm your ride");
         alertDialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.ConfirmRide);
+
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 new MapService(context, new AsyncResponse() {
                     @Override
                     public void processFinish(String response) {
                         //rideNowDetails = gson.fromJson(response,RideNowModel.class);
-                        rideNowDetails.RideStatus=2;
+                        rideNowDetails.RideStatus = 2;
                         UpdateUI(2);
                     }
                 }).ConfirmRide(requestUrl, rideNowDetails);
             }
         });
 
-        alertDialogBuilder.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 finish();
@@ -654,29 +626,25 @@ public class MainActivity extends BaseAppCompatActivity
         alertDialog.show();
     }
 
-    public void UpdateUI(int rideStatus)
-    {
-        if(rideStatus==2)
-        {
+    public void UpdateUI(int rideStatus) {
+        if (rideStatus == 2) {
             noConnectionHandler.removeCallbacks(noConnectionRunnable);
             getCabDurations(cabType, rideNowDetails.Driver.DriverId);
             layoutImageView.setVisibility(View.GONE);
             layoutRide.setVisibility(View.GONE);
             layoutDriverDetails.setVisibility(View.VISIBLE);
-            txtViewETADuration=((TextView)findViewById(R.id.txtViewETADuration));
+            txtViewETADuration = ((TextView) findViewById(R.id.txtViewETADuration));
             layoutCancelRide.setVisibility(View.VISIBLE);
             layoutSearchAddress.setVisibility(View.GONE);
-            if(TextUtils.isEmpty(rideNowDetails.ETA))
-            {
+            if (TextUtils.isEmpty(rideNowDetails.ETA)) {
                 txtViewETADuration.setText("N/A");
-            }
-            else {
+            } else {
                 txtViewETADuration.setText(rideNowDetails.ETA);
             }
             (findViewById(R.id.btnCallDriver)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String phno = rideNowDetails.userDetails.Contact;
+                    String phno = rideNowDetails.userDetails.ContactNo;
 
                     Intent i = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phno));
                     startActivity(i);
@@ -688,7 +656,9 @@ public class MainActivity extends BaseAppCompatActivity
 
 class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
 
-    /** Global instance of the HTTP transport. */
+    /**
+     * Global instance of the HTTP transport.
+     */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
     private String latlng;
@@ -696,14 +666,14 @@ class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
     String address;
     private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
     public AsyncResponse delegate = null;
-    public SearchPlacesHelper(String latlng,AsyncResponse delegate) {
+
+    public SearchPlacesHelper(String latlng, AsyncResponse delegate) {
         this.latlng = latlng;
         this.delegate = delegate;
     }
 
     @Override
-    protected String doInBackground(Void... params)
-    {
+    protected String doInBackground(Void... params) {
 
         try {
 
@@ -733,7 +703,7 @@ class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
 
     /**
      * Creating http request Factory
-     * */
+     */
     public static HttpRequestFactory createRequestFactory(
             final HttpTransport transport) {
         return transport.createRequestFactory(new HttpRequestInitializer() {

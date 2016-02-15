@@ -14,4 +14,5 @@ public class User implements Serializable{
     public String Password;
     public boolean IsActive;
     public int ContactVerificationStatus;
+    public String AccessToken;
 }

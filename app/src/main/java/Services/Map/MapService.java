@@ -44,11 +44,17 @@ public class MapService {
         apiRequestModel = new APIRequestModel();
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.RequestUrl = requestUrl;
+        apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.SetAuthorizationHeader=true;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage="";
 
-        asyncTask = new APIResponse(context,null,"","");
+        asyncTask = new APIResponse(apiRequestModel);
 
         try {
-            String APIResponse = asyncTask.execute(apiRequestModel).get();
+            String APIResponse = asyncTask.execute().get();
             cabDurations = gson.fromJson(APIResponse, CabDuration[].class);
         } catch (Exception ex) {
             Log.d("Cab Duration: ", ex.getMessage());
@@ -61,17 +67,22 @@ public class MapService {
         apiRequestModel = new APIRequestModel();
         apiRequestModel.PostRequestObject = gson.toJson(rideNowModel);
         apiRequestModel.RequestUrl = requestUrl;
-        apiRequestModel.HttpVerb = "POST";
-
-        asyncTask =   new APIResponse(context, new AsyncResponse() {
+        apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.SetAuthorizationHeader=true;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=true;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage="Confirming your ride";
+        apiRequestModel.Response= new AsyncResponse() {
             @Override
             public void processFinish(String output) {
                 delegate.processFinish(output);
             }
-        },"","Booking your ride");
+        };
+        asyncTask = new APIResponse(apiRequestModel);
 
         try {
-            asyncTask.execute(apiRequestModel);
+            asyncTask.execute();
         } catch (Exception ex) {
             Log.d("ConfirmRide: ", ex.getMessage());
         }

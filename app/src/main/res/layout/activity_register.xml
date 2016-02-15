@@ -20,14 +20,14 @@
                 android:layout_marginRight="5dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
-                android:background="#FFFFFF">
-                <TextView
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15px"
-                    android:layout_marginTop="15px"
-                    android:layout_marginLeft="5px"
-                    android:background="@drawable/icon_contact"/>
+                android:background="#FFFFFF"
+                android:layout_gravity="center_horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/icon_contact"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp" />
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:background="#FFFFFF"
@@ -55,13 +55,12 @@
                 android:layout_marginTop="20dp"
                 android:background="#FFFFFF"
                 >
-                <TextView
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15px"
-                    android:layout_marginTop="15px"
-                    android:layout_marginLeft="5px"
-                    android:background="@drawable/icon_username"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/icon_username" />
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:background="#FFFFFF"
@@ -87,12 +86,11 @@
                 android:layout_marginTop="20dp"
                 android:background="#FFFFFF"
                 >
-                <TextView
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15px"
-                    android:layout_marginTop="15px"
-                    android:layout_marginLeft="5px"
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_gravity="center"
                     android:background="@drawable/icon_email"/>
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -117,14 +115,12 @@
                 android:background="#FFFFFF"
                 android:layout_marginRight="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginTop="20dp"
-                >
-                <TextView
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15px"
-                    android:layout_marginTop="15px"
-                    android:layout_marginLeft="5px"
+                android:layout_marginTop="20dp">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_gravity="center"
                     android:background="@drawable/icon_password"/>
                 <android.support.design.widget.TextInputLayout android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -156,12 +152,11 @@
                 android:background="#FFFFFF"
                 android:layout_marginTop="20dp"
                 >
-                <TextView
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="15px"
-                    android:layout_marginTop="15px"
-                    android:layout_marginLeft="5px"
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_gravity="center"
                     android:background="@drawable/icon_confirmpassword"/>
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -182,11 +177,10 @@
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 
-            <Button android:id="@+id/email_register_button" style="?android:textAppearanceSmall"
+            <Button android:id="@+id/email_register_button"
                 android:layout_width="match_parent" android:layout_height="match_parent"
                 android:layout_marginTop="25dp" android:text="@string/action_Register"
-                android:textStyle="bold"
-                android:background="#4ED323" />
+                style="@style/button_general" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

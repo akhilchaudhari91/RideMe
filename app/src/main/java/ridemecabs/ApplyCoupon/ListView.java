@@ -186,7 +186,12 @@ public class ListView extends BaseAppCompatActivity {
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.HttpVerb = "GET";
 
-        asyncTask = new APIResponse(context, new AsyncResponse() {
+        apiRequestModel.SetAuthorizationHeader=true;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=true;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage="Fetching coupons";
+        apiRequestModel.Response = new AsyncResponse() {
             @Override
             public void processFinish(String output) {
                 try {
@@ -197,9 +202,9 @@ public class ListView extends BaseAppCompatActivity {
                     Log.d("GetUserCoupons", ex.getMessage());
                 }
             }
-        }, "", "Fetching coupons");
-
-        asyncTask.execute(apiRequestModel);
+        };
+        asyncTask = new APIResponse(apiRequestModel);
+        asyncTask.execute();
     }
 
     private void DisplayCoupons(List<Coupon> details)

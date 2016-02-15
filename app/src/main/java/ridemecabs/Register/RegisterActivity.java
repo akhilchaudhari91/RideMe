@@ -25,6 +25,10 @@ import android.widget.Toast;
 import com.example.ridemecabs.rideme.R;
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +36,9 @@ import Entity.KeyValue;
 import Entity.User;
 import Entity.UserDetails;
 import Infrastructure.ConnectionDetector;
+import Infrastructure.MD5;
+import Services.Enum.DuplicateEntryStatus;
+import Services.Enum.EnumSharedPreferences;
 import Services.Register.IUserServiceResponse;
 import Services.Register.RegisterService;
 import ridemecabs.Main.MainActivity;
@@ -42,8 +49,8 @@ public class RegisterActivity extends AppCompatActivity {
     User user = null;
     Context context;
     boolean cancel = false;
-    boolean isDuplicateContact = false;
-    boolean isDuplicateEmail = false;
+    DuplicateEntryStatus isDuplicateContact = DuplicateEntryStatus.NotVerified;
+    DuplicateEntryStatus isDuplicateEmail = DuplicateEntryStatus.NotVerified;
 
 
     private EditText mEmailView;
@@ -53,7 +60,6 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mContactView;
 
     final Gson gson = new Gson();
-    RegisterService registerService;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -69,16 +75,6 @@ public class RegisterActivity extends AppCompatActivity {
             mCustomerNameView = (EditText) findViewById(R.id.customerName);
             mContactView = (EditText) findViewById(R.id.mobileNumber);
 
-            /* String email = ReadOwnerData.getEmail(this);
-
-            TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
-            String number = tm.getLine1Number();
-
-            if(email!=null && TextUtils.isEmpty(email))
-            {
-                mEmailView.setText(email);
-            } */
-
             final Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
 
             mConfirmPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -91,6 +87,26 @@ public class RegisterActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            mContactView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus) {
+                        isDuplicateContact = DuplicateEntryStatus.NotVerified;
+                       CheckDuplicateContact();
+                    }
+                }
+            });
+
+            mEmailView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus) {
+                        isDuplicateEmail = DuplicateEntryStatus.NotVerified;
+                        CheckDuplicateEmail();
+                    }
+                }
+            });
+
             mEmailRegisterButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -110,6 +126,19 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void attemptRegister() {
 
+        try {
+            int counter = 0;
+            while (counter < 30 && ((isDuplicateContact == DuplicateEntryStatus.Error || isDuplicateContact == DuplicateEntryStatus.NotVerified)
+                    && (isDuplicateEmail == DuplicateEntryStatus.Error || isDuplicateEmail == DuplicateEntryStatus.NotVerified))) {
+                Thread.sleep(1000);
+                counter++;
+            }
+        }
+        catch (InterruptedException ex)
+        {
+            Log.d("Duplicate entry", ex.getMessage());
+        }
+
         String email = mEmailView.getText().toString();
         final String password = mPasswordView.getText().toString();
         String contactNo = mContactView.getText().toString();
@@ -123,16 +152,24 @@ public class RegisterActivity extends AppCompatActivity {
             user.IsActive = true;
 
             try {
-                byte[] data = password.getBytes("UTF-8");
-                user.Password = Base64.encodeToString(data, Base64.DEFAULT);
+                user.Password = MD5.crypt(password);
 
                 String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.RegisterUser);
 
                new RegisterService(context, new IUserServiceResponse() {
                    @Override
                    public void processFinish(String response) {
-                           UserDetails registerDetails = gson.fromJson(response,UserDetails.class);
-                           AsyncTaskResult(registerDetails);
+                       try {
+                           JSONObject obj = new JSONObject(response);
+                           user.AccessToken = obj.getString("accessToken").toString();
+                           user.Id = Integer.parseInt(obj.getString("id").toString());
+
+                           AsyncTaskResult(user);
+                       }
+                       catch (JSONException ex)
+                       {
+                           Log.d("Registration response: ",ex.getMessage());
+                       }
                    }
                }).RegisterUser(user, requestUrl);
 
@@ -143,10 +180,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean CheckValidations() {
         // Reset errors.
-        mEmailView.setError(null);
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
-        mContactView.setError(null);
         mCustomerNameView.setError(null);
         cancel = false;
 
@@ -194,19 +229,31 @@ public class RegisterActivity extends AppCompatActivity {
             cancel = true;
         }
 
+        if(isDuplicateEmail==DuplicateEntryStatus.True)
+        {
+            focusView = mEmailView;
+            cancel=true;
+        }
+        if(isDuplicateContact==DuplicateEntryStatus.True)
+        {
+            focusView = mContactView;
+            cancel=true;
+        }
         if (cancel) {
             focusView.requestFocus();
         }
         else
         {
-            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.CheckDuplicateEntry);
-
-            new RegisterService(context, new IUserServiceResponse() {
-                @Override
-                public void processFinish(String response) {
-                    CheckDuplicateEntry(response);
-                }
-            }).CheckDuplicateEntry(mContactView.getText().toString(), mEmailView.getText().toString(), requestUrl);
+            if(isDuplicateContact==DuplicateEntryStatus.Error || isDuplicateContact==DuplicateEntryStatus.NotVerified ||
+                isDuplicateEmail==DuplicateEntryStatus.Error || isDuplicateEmail==DuplicateEntryStatus.NotVerified )
+            {
+                CheckDuplicateContact();
+                CheckDuplicateEmail();
+            }
+            else
+            {
+                attemptRegister();
+            }
         }
         return cancel;
     }
@@ -219,56 +266,12 @@ public class RegisterActivity extends AppCompatActivity {
         return password.length() > 4;
     }
 
-    private void CheckDuplicateEntry(String response)
-    {
-        View focusView=null;
-        List<KeyValue> keyValues = Arrays.asList(gson.fromJson(response,KeyValue[].class));
-        isDuplicateContact = false;
-        isDuplicateEmail = false;
-
-        try {
-            for (KeyValue keyValue : keyValues) {
-                if (keyValue.Value.equals("True")) {
-                    if (keyValue.Key.equals("Contact")) {
-                        isDuplicateContact = true;
-                        cancel = true;
-                    }
-                    if (keyValue.Key.equals("Email")) {
-                        isDuplicateEmail = true;
-                        cancel = true;
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Log.d("Duplicate entry", ex.getMessage());
-        }
-
-        if (isDuplicateContact) {
-            mContactView.setError(getString(R.string.error_duplicate_contact));
-            focusView = mContactView;
-            cancel = true;
-        }
-        else if (isDuplicateEmail) {
-            mEmailView.setError(getString(R.string.error_duplicate_email));
-            focusView = mEmailView;
-            cancel = true;
-        }
-
-        if(cancel)
-        {
-            focusView.requestFocus();
-        }
-        else
-        {
-            attemptRegister();
-        }
-    }
-    private void AsyncTaskResult(UserDetails userDetails) {
+    private void AsyncTaskResult(User userDetails) {
         if (userDetails != null && userDetails.Id > 0) {
             userDetails.Password = user.Password;
-            SharedPreferences settings = getSharedPreferences(getResources().getString(R.string.shared_preferences_name), 0);
+            SharedPreferences settings = getSharedPreferences(EnumSharedPreferences.UserDetails.toString(), 0);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("UserDetails", gson.toJson(userDetails));
+            editor.putString(EnumSharedPreferences.UserDetails.toString(), gson.toJson(userDetails));
 
             // Commit the edits!
             editor.commit();
@@ -290,4 +293,53 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    private void CheckDuplicateContact()
+    {
+        String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.CheckIfContactExists);
+        new RegisterService(context, new IUserServiceResponse() {
+            @Override
+            public void processFinish(String response) {
+                if(TextUtils.isEmpty(response))
+                {
+                    isDuplicateContact = DuplicateEntryStatus.Error;
+                }
+                else {
+                    isDuplicateContact = DuplicateEntryStatus.getEnum(Integer.parseInt(response));
+                    if(isDuplicateContact==DuplicateEntryStatus.True)
+                    {
+                        mContactView.setError(getString(R.string.error_duplicate_contact));
+                    }
+                    else
+                    {
+                        mContactView.setError(null);
+                    }
+                }
+            }
+        }).CheckIfContactExists(mContactView.getText().toString(), requestUrl);
+    }
+
+    private void CheckDuplicateEmail()
+    {
+        String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.CheckIfEmailExists);
+        new RegisterService(context, new IUserServiceResponse() {
+            @Override
+            public void processFinish(String response) {
+                if(TextUtils.isEmpty(response))
+                {
+                    isDuplicateEmail = DuplicateEntryStatus.Error;
+                }
+                else {
+                    isDuplicateEmail = DuplicateEntryStatus.getEnum(Integer.parseInt(response));
+                    if(isDuplicateEmail==DuplicateEntryStatus.True)
+                    {
+                        mEmailView.setError(getString(R.string.error_duplicate_email));
+                    }
+                    else
+                    {
+                        mEmailView.setError(null);
+                    }
+                }
+            }
+        }).CheckIfEmailExists(mEmailView.getText().toString(), requestUrl);
+    }
 }

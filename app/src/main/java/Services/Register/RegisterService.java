@@ -34,29 +34,62 @@ public class RegisterService {
         this.delegate = delegate;
     }
 
-    public List<KeyValue> CheckDuplicateEntry(String contact, String email, String requestUrl) {
+    public List<KeyValue> CheckIfEmailExists(String email, String requestUrl) {
         keyValues = new ArrayList<>();
-        keyValues.add(new KeyValue("Contact", contact));
-        keyValues.add(new KeyValue("Email", email));
+        keyValues.add(new KeyValue("Contact", email));
 
         apiRequestModel = new APIRequestModel();
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.RequestUrl = requestUrl;
         apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.SetAuthorizationHeader=false;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.Response=new AsyncResponse() {
+            @Override
+            public void processFinish(String output) {
+                delegate.processFinish(output);
+            }
+        };
 
         try {
-            asyncTask = new APIResponse(context, new AsyncResponse() {
-                @Override
-                public void processFinish(String output) {
-                    delegate.processFinish(output);
-                }
-            },"", "Checking duplicate entries");
+            asyncTask = new APIResponse(apiRequestModel);
 
-            asyncTask.execute(apiRequestModel);
+            asyncTask.execute();
 
 
         } catch (Exception ex) {
-            Log.d("Duplicate Entry: ", ex.getMessage());
+            Log.d("Duplicate Email: ", ex.getMessage());
+        }
+        return keyValues;
+    }
+
+    public List<KeyValue> CheckIfContactExists(String contact, String requestUrl) {
+        keyValues = new ArrayList<>();
+        keyValues.add(new KeyValue("Contact", contact));
+
+        apiRequestModel = new APIRequestModel();
+        apiRequestModel.KeyValuePair = keyValues;
+        apiRequestModel.RequestUrl = requestUrl;
+        apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.SetAuthorizationHeader=false;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.DisplayProgressBar=false;
+        apiRequestModel.Response=new AsyncResponse() {
+            @Override
+            public void processFinish(String output) {
+                delegate.processFinish(output);
+            }
+        };
+
+        try {
+            asyncTask = new APIResponse(apiRequestModel);
+
+            asyncTask.execute();
+
+
+        } catch (Exception ex) {
+            Log.d("Duplicate Contact: ", ex.getMessage());
         }
         return keyValues;
     }
@@ -64,19 +97,27 @@ public class RegisterService {
     public void RegisterUser(User model, String requestUrl)
     {
         apiRequestModel = new APIRequestModel();
+        apiRequestModel.Context = context;
         apiRequestModel.PostRequestObject = gson.toJson(model);
         apiRequestModel.RequestUrl = requestUrl;
         apiRequestModel.HttpVerb = "POST";
-
-        asyncTask =   new APIResponse(context, new AsyncResponse() {
+        apiRequestModel.SetAuthorizationHeader=false;
+        apiRequestModel.SetOTPHeader=false;
+        apiRequestModel.ProgressDialogTitle="";
+        apiRequestModel.ProgressDialogMessage="Creating account";
+        apiRequestModel.DisplayProgressBar=true;
+        apiRequestModel.Response= new AsyncResponse() {
             @Override
             public void processFinish(String output) {
                 delegate.processFinish(output);
+
             }
-        },"","Creating your account");
+        };
+
+        asyncTask = new APIResponse(apiRequestModel);
 
         try {
-            asyncTask.execute(apiRequestModel);
+            asyncTask.execute();
         } catch (Exception ex) {
             Log.d("User Registration: ", ex.getMessage());
         }

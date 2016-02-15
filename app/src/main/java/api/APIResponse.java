@@ -10,6 +10,7 @@ import android.util.Log;
 import com.google.api.client.googleapis.GoogleHeaders;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -25,29 +26,27 @@ import Entity.KeyValue;
 /**
  * Created by akhil on 03-01-2016.
  */
-public class APIResponse extends AsyncTask<APIRequestModel, Void, String> {
+public class APIResponse extends AsyncTask<Void, Void, String> {
 
-    Context context;
-    String title;
-    String message;
+    final APIRequestModel model;
     static int progressCount = 0;
+    static String AuthorizationToken;
 
     private ProgressDialog mLoadingDialog;
     private Handler mHandler = new Handler();
-    public AsyncResponse delegate = null;
     private final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     final Gson gson = new Gson();
 
-    private void showLoadingDialog(final String title, final String msg) {
+    private void showLoadingDialog() {
         progressCount++;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (mLoadingDialog == null) {
-                    mLoadingDialog = ProgressDialog.show(context, title, msg);
+                    mLoadingDialog = ProgressDialog.show(model.Context, model.ProgressDialogTitle,model.ProgressDialogMessage);
                 }
-                mLoadingDialog.setTitle(title);
-                mLoadingDialog.setMessage(msg);
+                mLoadingDialog.setTitle(model.ProgressDialogTitle);
+                mLoadingDialog.setMessage(model.ProgressDialogMessage);
                 mLoadingDialog.show();
             }
         });
@@ -64,19 +63,16 @@ public class APIResponse extends AsyncTask<APIRequestModel, Void, String> {
         });
     }
 
-    public APIResponse(Context context, AsyncResponse delegate, String title,String message)
+    public APIResponse(APIRequestModel model)
     {
-        this.context = context;
-        this.delegate = delegate;
-        this.title = title;
-        this.message = message;
+        this.model = model;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if(!message.equals("")) {
-            showLoadingDialog(title, message);
+        if(model.DisplayProgressBar) {
+            showLoadingDialog();
         }
     }
 
@@ -84,29 +80,41 @@ public class APIResponse extends AsyncTask<APIRequestModel, Void, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         hideLoadingDialog();
-        if(!message.equals("")) {
-            delegate.processFinish(result);
+        if(model.Response!=null) {
+            model.Response.processFinish(result);
         }
     }
 
     @Override
-    protected String doInBackground(APIRequestModel... params) {
+    protected String doInBackground(Void... params) {
         String result = "";
         HttpRequest request=null;
         try {
 
             HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
 
-            if(params[0].HttpVerb.equals("GET")) {
+            if(model.HttpVerb.equals("GET")) {
                 request = httpRequestFactory
-                        .buildGetRequest(new GenericUrl(params[0].RequestUrl));
-                request.getUrl().put("json", gson.toJson(params[0].KeyValuePair));
+                        .buildGetRequest(new GenericUrl(model.RequestUrl));
+                request.getUrl().put("json", gson.toJson(model.KeyValuePair));
+                if(model.SetAuthorizationHeader) {
+                    request.getHeaders().setAuthorization(AuthorizationToken);
+                }
             }
-            if(params[0].HttpVerb.equals("POST")) {
+            if(model.HttpVerb.equals("POST")) {
                 request = httpRequestFactory
-                        .buildPostRequest(new GenericUrl(params[0].RequestUrl), ByteArrayContent.fromString(null, params[0].PostRequestObject));
+                        .buildPostRequest(new GenericUrl(model.RequestUrl), ByteArrayContent.fromString(null, model.PostRequestObject));
 
                 request.getHeaders().setContentType("application/json");
+                if(model.SetAuthorizationHeader) {
+                    request.getHeaders().setAccept("application/json");
+                    request.getHeaders().setAuthorization(AuthorizationToken);
+                }
+                if(model.SetOTPHeader) {
+                    HttpHeaders headers = new HttpHeaders();
+                    request.getHeaders().setAccept("application/json");
+                    headers.set("X-OTP",model.OTP);
+                }
             }
 
             result = request.execute().parseAsString();
