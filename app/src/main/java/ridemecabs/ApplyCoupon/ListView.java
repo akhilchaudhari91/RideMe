@@ -28,6 +28,7 @@ import Entity.Coupon;
 import Entity.KeyValue;
 import Entity.RideNowModel;
 import Infrastructure.ConnectionDetector;
+import Services.Enum.EnumSharedPreferences;
 import api.APIResponse;
 import api.AsyncResponse;
 import ridemecabs.Exception.BaseAppCompatActivity;
@@ -48,7 +49,7 @@ public class ListView extends BaseAppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         context = this;
         intent = getIntent();
-        rideDetails = (RideNowModel) intent.getSerializableExtra("rideNowDetails");
+        rideDetails = (RideNowModel) intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_coupons);
@@ -120,7 +121,7 @@ public class ListView extends BaseAppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                     intent = new Intent(getBaseContext(), MainActivity.class);
-                    intent.putExtra("rideNowDetails", rideDetails);
+                    intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideDetails);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
@@ -185,7 +186,7 @@ public class ListView extends BaseAppCompatActivity {
         apiRequestModel.RequestUrl = getString(R.string.APIBaseURL) + getString(R.string.ApplyCoupon);
         apiRequestModel.KeyValuePair = keyValues;
         apiRequestModel.HttpVerb = "GET";
-
+        apiRequestModel.Context = context;
         apiRequestModel.SetAuthorizationHeader=true;
         apiRequestModel.SetOTPHeader=false;
         apiRequestModel.DisplayProgressBar=true;

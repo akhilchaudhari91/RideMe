@@ -1,9 +1,11 @@
 package Entity;
 
+import java.io.Serializable;
+
 /**
  * Created by akhil on 06-02-2016.
  */
-public class DriverDetails {
+public class DriverDetails implements Serializable{
 
     public int DriverId;
     public String DriverName;

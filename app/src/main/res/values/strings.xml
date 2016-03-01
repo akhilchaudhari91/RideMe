@@ -9,6 +9,7 @@
     <string name="ApplyCoupon">UserCoupons/GetActiveCouponsForUser</string>
     <string name="RideEstimate">RideNow/GetRideEstimates</string>
     <string name="ConfirmRide">RideNow/ConfirmRide</string>
+    <string name="VerifyOTP">User/VerifyOTP</string>
 
 
     <string name="app_name">RideMe</string>
@@ -27,11 +28,16 @@
     <string name="error_duplicate_contact">The mobile number is already registered</string>
     <string name="error_invalid_contact_number">Please enter a 10 digit contact number</string>
     <string name="error_invalid_email">Please enter a valid email adrress</string>
-    <string name="error_invalid_password">Please enter a valid password greater than 4 characters</string>
+    <string name="error_invalid_password">Please enter a valid password greater than 6 characters</string>
     <string name="error_register">There seems to be some issue while registering your account. Please try again</string>
     <string name="error_internet_connection">You seem to be offline. Please check your internet connection</string>
     <string name="progress_dialog_duplicateEntry">Checking duplicate entries</string>
     <string name="progress_dialog_createAccount">Creating your account</string>
+
+    <!--OTP Verification-->
+    <string name="invalid_otp">Please enter a valid OTP</string>
+    <string name="error_otp_validation">There seems to be some error while validating the OTP. Please try again later</string>
+
 
     <!--Apply Coupon-->
     <string name="error_applycoupon">There seems to be some issue while fetching your coupons. Please try again</string>

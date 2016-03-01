@@ -41,9 +41,7 @@
                         android:editable="true"
                         android:phoneNumber="true"
                         android:background="@android:color/transparent"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15px"
-                        android:fontFamily="sans-serif"
+                        style="@style/clearableedittext"
                         android:hint="Contact" />
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
@@ -71,10 +69,7 @@
                         android:inputType="textCapWords"
                         android:ems="10"
                         android:id="@+id/customerName"
-                        android:background="@android:color/transparent"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15px"
-                        android:fontFamily="sans-serif"
+                        style="@style/clearableedittext"
                         android:hint="Name" />
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>
@@ -102,9 +97,7 @@
                         android:layout_height="wrap_content" android:hint="@string/prompt_email"
                         android:inputType="textEmailAddress" android:maxLines="1"
                         android:background="@android:color/transparent"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15px"
-                        android:fontFamily="sans-serif"
+                        style="@style/clearableedittext"
                         android:singleLine="true" />
 
                 </android.support.design.widget.TextInputLayout>
@@ -136,9 +129,7 @@
                         android:imeOptions="actionUnspecified"
                         android:inputType="textPassword"
                         android:background="@android:color/transparent"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15px"
-                        android:fontFamily="sans-serif"
+                        style="@style/clearableedittext"
                         android:maxLines="1"
                         android:singleLine="true" />
 
@@ -169,9 +160,7 @@
                         android:imeActionLabel="@string/action_Register"
                         android:imeOptions="actionUnspecified" android:inputType="textPassword"
                         android:background="@android:color/transparent"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15px"
-                        android:fontFamily="sans-serif"
+                        style="@style/clearableedittext"
                         android:maxLines="1" android:singleLine="true" />
 
                 </android.support.design.widget.TextInputLayout>

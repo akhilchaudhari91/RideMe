@@ -18,9 +18,10 @@ public class RideNowModel implements Serializable{
         this.SelectedCoupon = new Coupon();
         this.RideEstimate = new RideEstimate();
         this.Driver = new DriverDetails();
+        this.userDetails = new User();
     }
 
-    public UserDetails userDetails;
+    public User userDetails;
 
     public String CabType;
 
@@ -39,4 +40,6 @@ public class RideNowModel implements Serializable{
     public int RideStatus;
 
     public String ETA;
+
+    public String AccessToken;
 }

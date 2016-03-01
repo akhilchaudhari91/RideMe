@@ -1,5 +1,6 @@
 package ridemecabs.RideEstimate;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,7 @@ import java.util.List;
 import Entity.APIRequestModel;
 import Entity.KeyValue;
 import Entity.RideNowModel;
+import Services.Enum.EnumSharedPreferences;
 import api.APIResponse;
 import api.AsyncResponse;
 import ridemecabs.Main.MainActivity;
@@ -32,31 +34,32 @@ public class RideEstimateActivity extends AppCompatActivity {
     double baseFare = 0;
     APIResponse asyncTask;
     Gson gson = new Gson();
+    Context context;
     APIRequestModel apiRequestModel = new APIRequestModel();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        context = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ride_estimate);
         Button btnClose = ((Button)findViewById(R.id.btnCloseRideEstimate));
         intent = getIntent();
-        model = (RideNowModel) intent.getSerializableExtra("rideNowDetails");
+        model = (RideNowModel) intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("rideNowDetails", model);
+                intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), model);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         });
 
-        List<KeyValue> keyValues = new ArrayList<KeyValue>();
-        keyValues.add(new KeyValue("serializableModel", gson.toJson(model)));
         apiRequestModel.RequestUrl = getString(R.string.APIBaseURL) + getString(R.string.RideEstimate);
-        apiRequestModel.KeyValuePair = keyValues;
-        apiRequestModel.HttpVerb = "GET";
-        apiRequestModel.SetAuthorizationHeader=false;
+        apiRequestModel.PostRequestObject = gson.toJson(model);
+        apiRequestModel.HttpVerb = "POST";
+        apiRequestModel.Context = context;
+        apiRequestModel.SetAuthorizationHeader=true;
         apiRequestModel.SetOTPHeader=false;
         apiRequestModel.DisplayProgressBar=false;
         apiRequestModel.ProgressDialogTitle="";

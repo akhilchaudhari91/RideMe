@@ -1,11 +1,9 @@
 package ridemecabs.Register;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,18 +18,17 @@ import android.widget.Toast;
 
 import com.example.ridemecabs.rideme.R;
 import com.google.gson.Gson;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import Entity.User;
 import Infrastructure.ConnectionDetector;
 import Infrastructure.MD5;
+import Infrastructure.UIHelper;
 import Services.Enum.DuplicateEntryStatus;
 import Services.Enum.EnumSharedPreferences;
 import Services.Register.IUserServiceResponse;
 import Services.Register.RegisterService;
-import ridemecabs.Main.MainActivity;
 import ridemecabs.SplashScreen.SplashScreenActivity;
 
 public class RegisterActivity extends AppCompatActivity{
@@ -119,12 +116,11 @@ public class RegisterActivity extends AppCompatActivity{
     private void attemptRegister() {
 
         try {
-            int counter = 0;
-            while (counter < 30 && ((isDuplicateContact == DuplicateEntryStatus.NotVerified || isDuplicateEmail == DuplicateEntryStatus.NotVerified))) {
-                Thread.sleep(1000);
-                counter++;
+            if(((isDuplicateContact == DuplicateEntryStatus.NotVerified || isDuplicateEmail == DuplicateEntryStatus.NotVerified))) {
+                CheckDuplicateContact(true);
+                CheckDuplicateEmail(true);
             }
-        } catch (InterruptedException ex) {
+        } catch (Exception ex) {
             Log.d("Duplicate entry", ex.getMessage());
         }
 
@@ -151,8 +147,8 @@ public class RegisterActivity extends AppCompatActivity{
                     try {
                         if(!TextUtils.isEmpty(response)) {
                             JSONObject obj = new JSONObject(response);
-                            user.AccessToken = obj.getString("accessToken").toString();
-                            user.Id = Integer.parseInt(obj.getString("id").toString());
+                            user.AccessToken = obj.getString("AccessToken").toString();
+                            user.Id = Integer.parseInt(obj.getString("Id").toString());
                         }
 
                         AsyncTaskResult(user);
@@ -175,20 +171,20 @@ public class RegisterActivity extends AppCompatActivity{
         cancel = false;
 
         // Store values at the time of the register attempt.
-        String email = mEmailView.getText().toString();
+        String email = mEmailView.getText().toString().trim();
         String password = mPasswordView.getText().toString();
         String confirmPassword = mConfirmPasswordView.getText().toString();
-        String contactNo = mContactView.getText().toString();
-        String customerName = mCustomerNameView.getText().toString();
+        String contactNo = mContactView.getText().toString().trim();
+        String customerName = mCustomerNameView.getText().toString().trim();
 
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!TextUtils.isEmpty(password) && !UIHelper.isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
-        } else if (!TextUtils.isEmpty(confirmPassword) && !isPasswordValid(confirmPassword)) {
+        } else if (!TextUtils.isEmpty(confirmPassword) && !UIHelper.isPasswordValid(confirmPassword)) {
             mConfirmPasswordView.setError(getString(R.string.error_invalid_confirmPassword));
             focusView = mConfirmPasswordView;
             cancel = true;
@@ -199,7 +195,7 @@ public class RegisterActivity extends AppCompatActivity{
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email) || !isEmailValid(email)) {
+        if (TextUtils.isEmpty(email) || !UIHelper.isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -212,7 +208,7 @@ public class RegisterActivity extends AppCompatActivity{
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(contactNo) || contactNo.length() != 10) {
+        if (TextUtils.isEmpty(contactNo) || contactNo.length() != 10 || !TextUtils.isDigitsOnly(contactNo)) {
             mContactView.setError(getString(R.string.error_invalid_contact_number));
             focusView = mContactView;
             cancel = true;
@@ -220,10 +216,12 @@ public class RegisterActivity extends AppCompatActivity{
 
         if (isDuplicateEmail == DuplicateEntryStatus.True) {
             focusView = mEmailView;
+            mEmailView.setError(getString(R.string.error_duplicate_email));
             cancel = true;
         }
         if (isDuplicateContact == DuplicateEntryStatus.True) {
             focusView = mContactView;
+            mContactView.setError(getString(R.string.error_duplicate_contact));
             cancel = true;
         }
         if (cancel) {
@@ -239,14 +237,6 @@ public class RegisterActivity extends AppCompatActivity{
         return cancel;
     }
 
-    private boolean isEmailValid(String email) {
-        return email.contains("@") && email.contains(".");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.length() > 4;
-    }
-
     private void AsyncTaskResult(User userDetails) {
         if (userDetails != null && userDetails.Id > 0) {
             userDetails.Password = user.Password;
@@ -256,8 +246,8 @@ public class RegisterActivity extends AppCompatActivity{
 
             // Commit the edits!
             editor.commit();
-            Intent intent = new Intent(this, MainActivity.class);
-
+            Intent intent = new Intent(this, OTPActivity.class);
+            intent.putExtra(EnumSharedPreferences.UserDetails.toString(), gson.toJson(userDetails));
             startActivity(intent);
         } else {
             ConnectionDetector connectionObj = new ConnectionDetector(this);

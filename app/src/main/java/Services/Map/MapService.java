@@ -65,9 +65,10 @@ public class MapService {
     public void ConfirmRide(String requestUrl, RideNowModel rideNowModel)
     {
         apiRequestModel = new APIRequestModel();
+        apiRequestModel.Context = context;
         apiRequestModel.PostRequestObject = gson.toJson(rideNowModel);
         apiRequestModel.RequestUrl = requestUrl;
-        apiRequestModel.HttpVerb = "GET";
+        apiRequestModel.HttpVerb = "POST";
         apiRequestModel.SetAuthorizationHeader=true;
         apiRequestModel.SetOTPHeader=false;
         apiRequestModel.DisplayProgressBar=true;

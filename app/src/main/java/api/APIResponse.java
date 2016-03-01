@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 
 import Entity.APIRequestModel;
 import Entity.KeyValue;
+import Entity.RideNowModel;
+import Services.Enum.EnumSharedPreferences;
 
 /**
  * Created by akhil on 03-01-2016.
@@ -30,7 +32,7 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
 
     final APIRequestModel model;
     static int progressCount = 0;
-    static String AuthorizationToken;
+    public static String AuthorizationToken;
 
     private ProgressDialog mLoadingDialog;
     private Handler mHandler = new Handler();
@@ -98,7 +100,7 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
                         .buildGetRequest(new GenericUrl(model.RequestUrl));
                 request.getUrl().put("json", gson.toJson(model.KeyValuePair));
                 if(model.SetAuthorizationHeader) {
-                    request.getHeaders().setAuthorization(AuthorizationToken);
+                    request.getHeaders().setAuthorization("Bearer " + AuthorizationToken);
                 }
             }
             if(model.HttpVerb.equals("POST")) {
@@ -108,18 +110,18 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
                 request.getHeaders().setContentType("application/json");
                 if(model.SetAuthorizationHeader) {
                     request.getHeaders().setAccept("application/json");
-                    request.getHeaders().setAuthorization(AuthorizationToken);
+                    request.getHeaders().setAuthorization("Bearer " + AuthorizationToken);
                 }
                 if(model.SetOTPHeader) {
                     HttpHeaders headers = new HttpHeaders();
                     request.getHeaders().setAccept("application/json");
-                    headers.set("X-OTP",model.OTP);
+                    request.getHeaders().set("X-OTP",model.OTP);
                 }
             }
 
             result = request.execute().parseAsString();
         } catch (Exception e) {
-            Log.e("APIResponse:", e.getMessage());
+                Log.e("APIResponse:", e.getMessage());
         }
         return result;
     }

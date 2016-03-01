@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ridemecabs.Register.OTPActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/splashscreen"
+        android:orientation="vertical"
+        android:gravity="center">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="150dp"
+            android:background="#FFFFFF"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+        <ridemecabs.Search.ClearableEditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:inputType="number"
+            android:id="@+id/txtOTP"
+            android:editable="true"
+            android:phoneNumber="true"
+            android:background="@android:color/transparent"
+            style="@style/clearableedittext"
+            android:hint="Enter OTP"
+            android:layout_gravity="center_vertical"
+            android:gravity="center" />
+        </android.support.design.widget.TextInputLayout>
+        <Button
+            android:id="@+id/btnVerify"
+            android:layout_width="200dp"
+            style="@style/button_general"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Verify"
+            android:textAllCaps="false"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</RelativeLayout>

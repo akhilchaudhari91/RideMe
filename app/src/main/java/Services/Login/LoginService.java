@@ -33,6 +33,7 @@ public class LoginService {
 
     public void AuthenticateUser(String email, String password, String requestUrl)
     {
+        apiRequestModel.Context = context;
         apiRequestModel.HttpVerb="GET";
         apiRequestModel.RequestUrl= requestUrl;
         apiRequestModel.KeyValuePair = new ArrayList<>();

@@ -3,6 +3,7 @@ package ridemecabs.Main;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -61,6 +62,7 @@ import Entity.UserDetails;
 import Infrastructure.ConnectionDetector;
 import Infrastructure.LocationHelper;
 import Infrastructure.UIHelper;
+import Services.Enum.EnumSharedPreferences;
 import Services.Map.MapService;
 import api.APIResponse;
 import api.AsyncResponse;
@@ -105,7 +107,6 @@ public class MainActivity extends BaseAppCompatActivity
 
     Context context;
     String cabType;
-    SearchPlacesHelper searchPlacesHelper;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -119,113 +120,11 @@ public class MainActivity extends BaseAppCompatActivity
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-            context = this;
-            locationHelper = new LocationHelper(context);
-
-            rideNowDetails = (RideNowModel) this.getIntent().getSerializableExtra("rideNowDetails");
-            if (rideNowDetails == null) {
-                rideNowDetails = new RideNowModel();
-            }
-
-            rideNowDetails.userDetails = gson.fromJson(this.getIntent().getSerializableExtra("UserDetails").toString(), UserDetails.class);
-
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.setDrawerListener(toggle);
-            toggle.syncState();
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(this);
-            noInternetSnackBarLayout = (CoordinatorLayout) findViewById(R.id.noInternetSnackBarLayout);
-            noLocationSnackBarLayout = (CoordinatorLayout) findViewById(R.id.noLocationSnackBarLayout);
-            txtViewCabDuration = (TextView) findViewById(R.id.txtViewCabDuration);
-            imgViewMini = (ImageView) findViewById(R.id.miniCabImage);
-            imgViewSedan = (ImageView) findViewById(R.id.sedanCabImage);
-            imgViewPrime = (ImageView) findViewById(R.id.primeCabImage);
-            layoutImageView = (LinearLayout) findViewById(R.id.layoutImageView);
-            imgApplyCoupon = (ImageView) findViewById(R.id.imgApplyCoupon);
-            TextView txtFareEstimate = (TextView) findViewById(R.id.txtViewFareEstimate);
-            txtSearchPlaces = (TextView) findViewById(R.id.txtSearchPlaces);
-            txtRideEstimate = ((TextView) findViewById(R.id.txtViewFareEstimate));
-            layoutDriverDetails = ((LinearLayout) findViewById(R.id.layoutDriverDetails));
-            layoutRide = ((LinearLayout) findViewById(R.id.layoutRide));
-            layoutCancelRide = ((LinearLayout) findViewById(R.id.layoutCancelRide));
-            layoutSearchAddress = ((LinearLayout) findViewById(R.id.layoutSearchAddress));
-
-            imgViewMini.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    displayCabMarkers(duration, "Mini");
-                }
-            });
-
-            imgViewSedan.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    displayCabMarkers(duration, "Sedan");
-                }
-            });
-
-            imgViewPrime.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    displayCabMarkers(duration, "Prime");
-                }
-            });
-
-            imgApplyCoupon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, ListView.class);
-                    intent.putExtra("rideNowDetails", rideNowDetails);
-                    startActivity(intent);
-                }
-            });
-
-            txtFareEstimate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, ridemecabs.Search.ListView.class);
-
-                    rideNowDetails.CabType = cabType;
-
-                    intent.putExtra("rideNowDetails", rideNowDetails);
-                    intent.putExtra("calculateFareEstimate", true);
-                    try {
-                        startActivity(intent);
-                    } catch (Exception ex) {
-                        Log.d("Activity", ex.getMessage());
-                    }
-                }
-            });
-
-            txtSearchPlaces.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, ridemecabs.Search.ListView.class);
-
-                    rideNowDetails.CabType = cabType;
-
-                    intent.putExtra("rideNowDetails", rideNowDetails);
-                    intent.putExtra("calculateFareEstimate", false);
-                    try {
-                        startActivity(intent);
-                    } catch (Exception ex) {
-                        Log.d("Activity", ex.getMessage());
-                    }
-                }
-            });
-
-
+            Initialize();
             CheckInternetConnectivity();
         } catch (Exception ex) {
             Log.d("h", ex.getMessage());
@@ -261,7 +160,7 @@ public class MainActivity extends BaseAppCompatActivity
         super.onNewIntent(intent);
 
 
-        rideNowDetails = (RideNowModel) intent.getSerializableExtra("rideNowDetails");
+        rideNowDetails = (RideNowModel) intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
         if (!TextUtils.isEmpty(rideNowDetails.SourceLocation.Address)) {
             txtSearchPlaces.setText(rideNowDetails.SourceLocation.Address);
         }
@@ -309,10 +208,10 @@ public class MainActivity extends BaseAppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        googleMap.setPadding(0, 0, 0, 450);
         try {
+            mMap = googleMap;
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            googleMap.setPadding(0, 0, 0, 450);
             mMap.setMyLocationEnabled(true);
         } catch (SecurityException ex) {
             Log.d("My Location", ex.getMessage());
@@ -355,6 +254,7 @@ public class MainActivity extends BaseAppCompatActivity
             }
 
             if (rideNowDetails.SourceLocation.Latitude != 0) {
+                UpdateCabDurations("Mini");
                 final LatLng latlng
                         = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
 
@@ -373,7 +273,6 @@ public class MainActivity extends BaseAppCompatActivity
                 myLocationMarker.setVisible(true);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
                 mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
-                UpdateCabDurations("Mini");
             }
         }
     }
@@ -506,6 +405,10 @@ public class MainActivity extends BaseAppCompatActivity
 
     private void UpdateCabDurations(final String cabType) {
         try {
+            if(cabDurationRunnable!=null)
+            {
+
+            }
             cabDurationRunnable = new Runnable() {
                 public void run() {
                     getCabDurations(cabType, rideNowDetails.Driver.DriverId);
@@ -520,15 +423,16 @@ public class MainActivity extends BaseAppCompatActivity
 
     private void getCabDurations(final String cabType, final int driverId) {
         try {
+
+            rideNowDetails.CabType = cabType;
+
             String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.GetCabDuration);
-            //duration = mapService.UpdateCabDuration(requestUrl, location.getLatitude(), location.getLongitude());
             APIRequestModel apiRequestModel;
             APIResponse asyncTask;
             List<KeyValue> keyValues;
-            Gson gson;
+            final Gson gson = new Gson();
 
-            CabDuration[] cabDurations = null;
-            keyValues = new ArrayList<KeyValue>();
+            keyValues = new ArrayList<>();
             keyValues.add(new KeyValue("latitude", Double.toString(rideNowDetails.SourceLocation.Latitude)));
             keyValues.add(new KeyValue("longitude", Double.toString(rideNowDetails.SourceLocation.Longitude)));
             keyValues.add(new KeyValue("driverId", Integer.toString(driverId)));
@@ -545,16 +449,9 @@ public class MainActivity extends BaseAppCompatActivity
             apiRequestModel.ProgressDialogMessage = "";
 
             asyncTask = new APIResponse(apiRequestModel);
-
-            try {
-                String APIResponse = asyncTask.execute().get();
-                gson = new Gson();
-                duration = gson.fromJson(APIResponse, CabDuration[].class);
-            } catch (Exception ex) {
-                Log.d("Cab Duration: ", ex.getMessage());
-            }
-
+            duration = gson.fromJson(asyncTask.execute().get(), CabDuration[].class);
             displayCabMarkers(duration, cabType);
+
         } catch (Exception ex) {
             Log.d("GetCabDurations", ex.getMessage());
         }
@@ -563,7 +460,7 @@ public class MainActivity extends BaseAppCompatActivity
 
     private void displayCabMarkers(CabDuration[] cabDurations, String cabType) {
         this.cabType = cabType == null ? "Mini" : cabType;
-        if (cabDurations != null && duration.length > 0) {
+        if (cabDurations != null && cabDurations.length > 0 && !TextUtils.isEmpty(cabDurations[0].CarType)) {
             for (CabDuration cab : cabDurations) {
                 if (cab.CarType.equals(cabType)) {
                     mMap.clear();
@@ -577,7 +474,6 @@ public class MainActivity extends BaseAppCompatActivity
                     for (String location : cab.Drivers) {
                         mMap.addMarker(new MarkerOptions().position(UIHelper.GetLatLngPosition(location)).title(cab.CarType).icon(BitmapDescriptorFactory.fromResource(R.drawable.mini)));
                     }
-                    if (rideNowDetails.RideStatus == 0 || rideNowDetails.RideStatus == 1) {
                         if (cab.DurationValue != 0) {
                             txtViewCabDuration.setText(cab.DurationText);
                             layoutImageView.setVisibility(View.VISIBLE);
@@ -589,7 +485,6 @@ public class MainActivity extends BaseAppCompatActivity
                             txtViewCabDuration.setText("No cabs");
                         }
                     }
-                }
             }
         } else {
             txtViewCabDuration.setText("No cabs");
@@ -607,7 +502,7 @@ public class MainActivity extends BaseAppCompatActivity
                 new MapService(context, new AsyncResponse() {
                     @Override
                     public void processFinish(String response) {
-                        //rideNowDetails = gson.fromJson(response,RideNowModel.class);
+                        rideNowDetails = gson.fromJson(response,RideNowModel.class);
                         rideNowDetails.RideStatus = 2;
                         UpdateUI(2);
                     }
@@ -652,69 +547,174 @@ public class MainActivity extends BaseAppCompatActivity
             });
         }
     }
-}
 
-class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
+    private void Initialize()
+    {
+        context = this;
+        locationHelper = new LocationHelper(context);
 
-    /**
-     * Global instance of the HTTP transport.
-     */
-    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-
-    private String latlng;
-    SearchPlacesModel list;
-    String address;
-    private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
-    public AsyncResponse delegate = null;
-
-    public SearchPlacesHelper(String latlng, AsyncResponse delegate) {
-        this.latlng = latlng;
-        this.delegate = delegate;
-    }
-
-    @Override
-    protected String doInBackground(Void... params) {
-
-        try {
-
-            HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
-            HttpRequest request = httpRequestFactory
-                    .buildGetRequest(new GenericUrl(API_URL));
-            request.getUrl().put("key", "AIzaSyAM6e58t0Fe-D4zAy6JeHOQ__YjA5BErog");
-            request.getUrl().put("latlng", latlng);
-
-            String s = request.execute().parseAsString();
-
-            Gson gson = new Gson();
-            list = gson.fromJson(s, SearchPlacesModel.class);
-            address = list.results.get(0).formatted_address;
-        } catch (Exception e) {
-            Log.e("Error:", e.getMessage());
-            //    return null;
+        rideNowDetails = gson.fromJson(this.getIntent().getSerializableExtra(EnumSharedPreferences.RideNowModel.toString()).toString(),RideNowModel.class);
+        if (rideNowDetails == null) {
+            rideNowDetails = new RideNowModel();
         }
-        return address;
-    }
 
+        SharedPreferences settings = getSharedPreferences(EnumSharedPreferences.UserDetails.toString(), 0);
+        rideNowDetails.userDetails = gson.fromJson(settings.getString(EnumSharedPreferences.UserDetails.toString(), null), UserDetails.class);
 
-    @Override
-    protected void onPostExecute(String result) {
-        delegate.processFinish(result);
-    }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
 
-    /**
-     * Creating http request Factory
-     */
-    public static HttpRequestFactory createRequestFactory(
-            final HttpTransport transport) {
-        return transport.createRequestFactory(new HttpRequestInitializer() {
-            public void initialize(HttpRequest request) {
-                GoogleHeaders headers = new GoogleHeaders();
-                headers.setApplicationName("AndroidHive-Places-Test");
-                request.setHeaders(headers);
-                JsonHttpParser parser = new JsonHttpParser(new JacksonFactory());
-                request.addParser(parser);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        noInternetSnackBarLayout = (CoordinatorLayout) findViewById(R.id.noInternetSnackBarLayout);
+        noLocationSnackBarLayout = (CoordinatorLayout) findViewById(R.id.noLocationSnackBarLayout);
+        txtViewCabDuration = (TextView) findViewById(R.id.txtViewCabDuration);
+        imgViewMini = (ImageView) findViewById(R.id.miniCabImage);
+        imgViewSedan = (ImageView) findViewById(R.id.sedanCabImage);
+        imgViewPrime = (ImageView) findViewById(R.id.primeCabImage);
+        layoutImageView = (LinearLayout) findViewById(R.id.layoutImageView);
+        imgApplyCoupon = (ImageView) findViewById(R.id.imgApplyCoupon);
+        TextView txtFareEstimate = (TextView) findViewById(R.id.txtViewFareEstimate);
+        txtSearchPlaces = (TextView) findViewById(R.id.txtSearchPlaces);
+        txtRideEstimate = ((TextView) findViewById(R.id.txtViewFareEstimate));
+        layoutDriverDetails = ((LinearLayout) findViewById(R.id.layoutDriverDetails));
+        layoutRide = ((LinearLayout) findViewById(R.id.layoutRide));
+        layoutCancelRide = ((LinearLayout) findViewById(R.id.layoutCancelRide));
+        layoutSearchAddress = ((LinearLayout) findViewById(R.id.layoutSearchAddress));
+
+        imgViewMini.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayCabMarkers(duration, "Mini");
             }
         });
-    }
 
+        imgViewSedan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayCabMarkers(duration, "Sedan");
+            }
+        });
+
+        imgViewPrime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayCabMarkers(duration, "Prime");
+            }
+        });
+
+        imgApplyCoupon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ListView.class);
+                intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideNowDetails);
+                startActivity(intent);
+            }
+        });
+
+        txtFareEstimate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ridemecabs.Search.ListView.class);
+
+                rideNowDetails.CabType = cabType;
+
+                intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideNowDetails);
+                intent.putExtra("calculateFareEstimate", true);
+                try {
+                    startActivity(intent);
+                } catch (Exception ex) {
+                    Log.d("Activity", ex.getMessage());
+                }
+            }
+        });
+
+        txtSearchPlaces.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ridemecabs.Search.ListView.class);
+
+                rideNowDetails.CabType = cabType;
+
+                intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideNowDetails);
+                intent.putExtra("calculateFareEstimate", false);
+                try {
+                    startActivity(intent);
+                } catch (Exception ex) {
+                    Log.d("Activity", ex.getMessage());
+                }
+            }
+        });
+
+
+    }
 }
+
+    class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
+
+        /**
+         * Global instance of the HTTP transport.
+         */
+        private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+
+        private String latlng;
+        SearchPlacesModel list;
+        String address;
+        private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
+        public AsyncResponse delegate = null;
+
+        public SearchPlacesHelper(String latlng, AsyncResponse delegate) {
+            this.latlng = latlng;
+            this.delegate = delegate;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            try {
+
+                HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
+                HttpRequest request = httpRequestFactory
+                        .buildGetRequest(new GenericUrl(API_URL));
+                request.getUrl().put("key", "AIzaSyAM6e58t0Fe-D4zAy6JeHOQ__YjA5BErog");
+                request.getUrl().put("latlng", latlng);
+
+                String s = request.execute().parseAsString();
+
+                Gson gson = new Gson();
+                list = gson.fromJson(s, SearchPlacesModel.class);
+                address = list.results.get(0).formatted_address;
+            } catch (Exception e) {
+                Log.e("Error:", e.getMessage());
+                //    return null;
+            }
+            return address;
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            delegate.processFinish(result);
+        }
+
+        /**
+         * Creating http request Factory
+         */
+        public static HttpRequestFactory createRequestFactory(
+                final HttpTransport transport) {
+            return transport.createRequestFactory(new HttpRequestInitializer() {
+                public void initialize(HttpRequest request) {
+                    GoogleHeaders headers = new GoogleHeaders();
+                    headers.setApplicationName("AndroidHive-Places-Test");
+                    request.setHeaders(headers);
+                    JsonHttpParser parser = new JsonHttpParser(new JacksonFactory());
+                    request.addParser(parser);
+                }
+            });
+        }
+
+    }

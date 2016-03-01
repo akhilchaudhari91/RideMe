@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import Entity.PlaceSearch.Result;
 import Entity.PlaceSearch.SearchPlacesModel;
 import Entity.RideNowModel;
+import Services.Enum.EnumSharedPreferences;
 import ridemecabs.Main.MainActivity;
 import ridemecabs.RideEstimate.RideEstimateActivity;
 
@@ -61,7 +62,7 @@ public class ListView extends AppCompatActivity {
         }
 
         intent = getIntent();
-        rideDetails= (RideNowModel)intent.getSerializableExtra("rideNowDetails");
+        rideDetails= (RideNowModel)intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
         calculateFareEstimate = (boolean)intent.getSerializableExtra("calculateFareEstimate");
 
 
@@ -95,7 +96,7 @@ public class ListView extends AppCompatActivity {
                     rideDetails.DestinationLocation.Address = ((Result) listView.getAdapter().getItem(position)).formatted_address;
 
                     intent = new Intent(getBaseContext(), RideEstimateActivity.class);
-                    intent.putExtra("rideNowDetails", rideDetails);
+                    intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideDetails);
                     startActivity(intent);
 
                 } else {
@@ -105,7 +106,7 @@ public class ListView extends AppCompatActivity {
                     rideDetails.searchAddress = ((Result) listView.getAdapter().getItem(position)).formatted_address;
 
                     intent = new Intent(getBaseContext(), MainActivity.class);
-                    intent.putExtra("rideNowDetails", rideDetails);
+                    intent.putExtra(EnumSharedPreferences.RideNowModel.toString(), rideDetails);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
