@@ -17,7 +17,7 @@ public class RideNowModel implements Serializable{
         this.DestinationLocation.Longitude=0d;
         this.SelectedCoupon = new Coupon();
         this.RideEstimate = new RideEstimate();
-        this.Driver = new DriverDetails();
+        this.Driver = new Driver();
         this.userDetails = new User();
     }
 
@@ -35,7 +35,7 @@ public class RideNowModel implements Serializable{
 
     public Coupon SelectedCoupon;
 
-    public DriverDetails Driver;
+    public Driver Driver;
 
     public int RideStatus;
 

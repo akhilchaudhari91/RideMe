@@ -28,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.example.ridemecabs.rideme.R;
@@ -91,11 +92,15 @@ public class MainActivity extends BaseAppCompatActivity
     ImageView imgViewPrime;
     ImageView imgApplyCoupon;
     LinearLayout layoutImageView;
-    LinearLayout layoutRide;
     LinearLayout layoutDriverDetails;
     TextView txtSearchPlaces;
     TextView txtRideEstimate;
     TextView txtViewETADuration;
+    TextView txtViewDriverName;
+    TextView txtViewCarName;
+    TextView txtViewCarNumber;
+    TextView txtViewDriverRatingCount;
+    RatingBar driverRatingBar;
     LinearLayout layoutCancelRide;
     LinearLayout layoutSearchAddress;
 
@@ -139,421 +144,11 @@ public class MainActivity extends BaseAppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-
-        rideNowDetails = (RideNowModel) intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
-        if (!TextUtils.isEmpty(rideNowDetails.SourceLocation.Address)) {
-            txtSearchPlaces.setText(rideNowDetails.SourceLocation.Address);
-        }
-
-        if (rideNowDetails.SourceLocation.Latitude != 0 && rideNowDetails.SourceLocation.Longitude != 0) {
-            UpdateCabDurations(cabType);
-            if (myLocationMarker != null) {
-                myLocationMarker.remove();
-            }
-            final LatLng latlng
-                    = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
-
-            myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-            myLocationMarker.setVisible(true);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
-            mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
-        }
-        if (rideNowDetails.RideEstimate.TotalFare > 0) {
-            txtRideEstimate.setText("₹" + Double.toString(rideNowDetails.RideEstimate.TotalFare));
-        }
-
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_rideNow) {
-            // Handle the camera action
-        } else if (id == R.id.nav_myRides) {
-//            setContentView(R.layout.activity_my_rides);
-
-        } else if (id == R.id.nav_emergencyContact) {
-
-        } else if (id == R.id.nav_about) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        try {
-            mMap = googleMap;
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            googleMap.setPadding(0, 0, 0, 450);
-            mMap.setMyLocationEnabled(true);
-        } catch (SecurityException ex) {
-            Log.d("My Location", ex.getMessage());
-        }
-
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-            @Override
-            public boolean onMyLocationButtonClick() {
-                if (locationHelper.canGetLocation()) {
-                    rideNowDetails.SourceLocation.SetLocationDetailsModel(locationHelper.getLocation());
-                    new SearchPlacesHelper(Double.toString(locationHelper.getLatitude()) + "," + Double.toString(locationHelper.getLongitude()), new AsyncResponse() {
-                        @Override
-                        public void processFinish(String response) {
-                            rideNowDetails.SourceLocation.Address = response;
-                            txtSearchPlaces.setText(response);
-                        }
-                    }).execute();
-                }
-
-                if (rideNowDetails.SourceLocation.Latitude != 0 && rideNowDetails.SourceLocation.Longitude != 0) {
-                    UpdateCabDurations(cabType);
-                    if (myLocationMarker != null) {
-                        myLocationMarker.remove();
-                    }
-                    final LatLng latlng
-                            = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
-
-                    myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-                    myLocationMarker.setVisible(true);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
-                    mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
-                }
-                return false;
-            }
-        });
-
-        if (locationHelper.canGetLocation()) {
-            if (rideNowDetails.SourceLocation.Latitude == 0) {
-                rideNowDetails.SourceLocation.SetLocationDetailsModel(locationHelper.getLocation());
-            }
-
-            if (rideNowDetails.SourceLocation.Latitude != 0) {
-                UpdateCabDurations("Mini");
-                final LatLng latlng
-                        = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
-
-                new SearchPlacesHelper(Double.toString(locationHelper.getLatitude()) + "," + Double.toString(locationHelper.getLongitude()), new AsyncResponse() {
-                    @Override
-                    public void processFinish(String response) {
-                        rideNowDetails.SourceLocation.Address = response;
-                        txtSearchPlaces.setText(response);
-                    }
-                }).execute();
-
-                if (myLocationMarker != null) {
-                    myLocationMarker.remove();
-                }
-                myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-                myLocationMarker.setVisible(true);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
-                mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
-            }
-        }
-    }
-
-    private void CheckInternetConnectivity() {
-        noConnectionRunnable = new Runnable() {
-            public void run() {
-                ShowInternetConnectionSnackBar();
-            }
-        };
-        noConnectionRunnable.run();
-    }
-
-    private void ShowInternetConnectionSnackBar() {
-        try {
-            if (!new ConnectionDetector(this).execute().get()) {
-                displayCabMarkers = true;
-                if (noInternetSnackBar == null) {
-                    layoutImageView.setVisibility(View.INVISIBLE);
-                    noInternetSnackBarLayout.setVisibility(View.VISIBLE);
-                    noInternetSnackBar = createSnackBar(noInternetSnackBarLayout, "No Internet Connection", noInternetSnackBar, false);
-                }
-                if (noLocationServiceSnackBar != null) {
-                    noLocationServiceSnackBar.dismiss();
-                    noLocationSnackBarLayout.setVisibility(View.GONE);
-                    noLocationServiceSnackBar = null;
-                }
-
-            } else {
-                if (noInternetSnackBar != null) {
-                    noInternetSnackBar.dismiss();
-                    noInternetSnackBar = null;
-                    noInternetSnackBarLayout.setVisibility(View.GONE);
-                }
-                if (!locationHelper.canGetLocation()) {
-                    if (!displayCabMarkers) {
-                        if (noLocationServiceSnackBar != null) {
-                            noLocationServiceSnackBar.dismiss();
-                            noLocationSnackBarLayout.setVisibility(View.GONE);
-                            noLocationServiceSnackBar = null;
-                        }
-                    }
-                    noLocationSnackBarLayout.setVisibility(View.VISIBLE);
-                    layoutImageView.setVisibility(View.INVISIBLE);
-                    noLocationServiceSnackBar = createSnackBar(noLocationSnackBarLayout, "Enable Location Services", noLocationServiceSnackBar, true);
-                    displayCabMarkers = true;
-                } else {
-                    if (rideNowDetails.RideStatus == 0 || rideNowDetails.RideStatus == 1) {
-                        layoutCancelRide.setVisibility(View.GONE);
-                        layoutSearchAddress.setVisibility(View.VISIBLE);
-                        if (displayCabMarkers) {
-                            if (noLocationServiceSnackBar != null) {
-                                noLocationServiceSnackBar.dismiss();
-                                noLocationSnackBarLayout.setVisibility(View.GONE);
-                                noLocationServiceSnackBar = null;
-                            }
-                            displayCabMarkers(duration, cabType);
-                            displayCabMarkers = false;
-                        }
-                        layoutImageView.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Log.d("Connection Detector", ex.getMessage());
-        }
-        noConnectionHandler.postDelayed(noConnectionRunnable, 5000);
-    }
-
-    private Snackbar createSnackBar(CoordinatorLayout layout, String messageText, Snackbar existingSnackBar, boolean includeEnableAction) {
-        Snackbar snackBar;
-        if (existingSnackBar == null) {
-            snackBar = Snackbar.make(layout, "", Snackbar.LENGTH_INDEFINITE);
-        } else {
-            snackBar = existingSnackBar;
-        }
-
-        if (includeEnableAction) {
-            snackBar.setAction("ENABLE", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                }
-            });
-        }
-        View sbView = snackBar.getView();
-        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setText(messageText);
-        textView.setTextColor(Color.YELLOW);
-        layout.setVisibility(View.VISIBLE);
-        snackBar.show();
-        ((android.support.design.widget.CoordinatorLayout.LayoutParams) snackBar.getView().getLayoutParams()).setBehavior(null);
-
-        return snackBar;
-    }
-
-    private void expandOrCollapse(final View v, String exp_or_colpse) {
-        TranslateAnimation anim;
-        if (exp_or_colpse.equals("expand")) {
-            anim = new TranslateAnimation(0.0f, 0.0f, -v.getHeight(), 0.0f);
-            v.setVisibility(View.VISIBLE);
-
-            anim.setDuration(750);
-            anim.setInterpolator(new AccelerateInterpolator(0.5f));
-            v.startAnimation(anim);
-        } else {
-            anim = new TranslateAnimation(0.0f, 0.0f, 0.0f, -v.getHeight());
-            Animation.AnimationListener collapselistener = new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    v.setVisibility(View.GONE);
-                }
-            };
-
-            anim.setAnimationListener(collapselistener);
-
-            anim.setDuration(750);
-            anim.setInterpolator(new AccelerateInterpolator(0.5f));
-            v.startAnimation(anim);
-        }
-    }
-
-    private void UpdateCabDurations(final String cabType) {
-        try {
-            if(cabDurationRunnable!=null)
-            {
-
-            }
-            cabDurationRunnable = new Runnable() {
-                public void run() {
-                    getCabDurations(cabType, rideNowDetails.Driver.DriverId);
-
-                }
-            };
-            cabDurationRunnable.run();
-        } catch (Exception ex) {
-            Log.d("f", ex.getMessage());
-        }
-    }
-
-    private void getCabDurations(final String cabType, final int driverId) {
-        try {
-
-            rideNowDetails.CabType = cabType;
-
-            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.GetCabDuration);
-            APIRequestModel apiRequestModel;
-            APIResponse asyncTask;
-            List<KeyValue> keyValues;
-            final Gson gson = new Gson();
-
-            keyValues = new ArrayList<>();
-            keyValues.add(new KeyValue("latitude", Double.toString(rideNowDetails.SourceLocation.Latitude)));
-            keyValues.add(new KeyValue("longitude", Double.toString(rideNowDetails.SourceLocation.Longitude)));
-            keyValues.add(new KeyValue("driverId", Integer.toString(driverId)));
-
-            apiRequestModel = new APIRequestModel();
-            apiRequestModel.KeyValuePair = keyValues;
-            apiRequestModel.RequestUrl = requestUrl;
-            apiRequestModel.HttpVerb = "GET";
-
-            apiRequestModel.SetAuthorizationHeader = true;
-            apiRequestModel.SetOTPHeader = false;
-            apiRequestModel.DisplayProgressBar = false;
-            apiRequestModel.ProgressDialogTitle = "";
-            apiRequestModel.ProgressDialogMessage = "";
-
-            asyncTask = new APIResponse(apiRequestModel);
-            duration = gson.fromJson(asyncTask.execute().get(), CabDuration[].class);
-            displayCabMarkers(duration, cabType);
-
-        } catch (Exception ex) {
-            Log.d("GetCabDurations", ex.getMessage());
-        }
-        cabDurationHandler.postDelayed(cabDurationRunnable, 30000);
-    }
-
-    private void displayCabMarkers(CabDuration[] cabDurations, String cabType) {
-        this.cabType = cabType == null ? "Mini" : cabType;
-        if (cabDurations != null && cabDurations.length > 0 && !TextUtils.isEmpty(cabDurations[0].CarType)) {
-            for (CabDuration cab : cabDurations) {
-                if (cab.CarType.equals(cabType)) {
-                    mMap.clear();
-                    final LatLng latlng
-                            = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
-                    if (myLocationMarker != null) {
-                        myLocationMarker.remove();
-                    }
-                    myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
-                    myLocationMarker.setVisible(true);
-                    for (String location : cab.Drivers) {
-                        mMap.addMarker(new MarkerOptions().position(UIHelper.GetLatLngPosition(location)).title(cab.CarType).icon(BitmapDescriptorFactory.fromResource(R.drawable.mini)));
-                    }
-                        if (cab.DurationValue != 0) {
-                            txtViewCabDuration.setText(cab.DurationText);
-                            layoutImageView.setVisibility(View.VISIBLE);
-                            if (noLocationServiceSnackBar != null) {
-                                noLocationServiceSnackBar.dismiss();
-                                noLocationServiceSnackBar = null;
-                            }
-                        } else {
-                            txtViewCabDuration.setText("No cabs");
-                        }
-                    }
-            }
-        } else {
-            txtViewCabDuration.setText("No cabs");
-        }
-    }
-
-    public void ShowConfirmation(View view) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage("Confirm your ride");
-        alertDialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.ConfirmRide);
-
-            @Override
-            public void onClick(DialogInterface arg0, int arg1) {
-                new MapService(context, new AsyncResponse() {
-                    @Override
-                    public void processFinish(String response) {
-                        rideNowDetails = gson.fromJson(response,RideNowModel.class);
-                        rideNowDetails.RideStatus = 2;
-                        UpdateUI(2);
-                    }
-                }).ConfirmRide(requestUrl, rideNowDetails);
-            }
-        });
-
-        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-    }
-
-    public void UpdateUI(int rideStatus) {
-        if (rideStatus == 2) {
-            noConnectionHandler.removeCallbacks(noConnectionRunnable);
-            getCabDurations(cabType, rideNowDetails.Driver.DriverId);
-            layoutImageView.setVisibility(View.GONE);
-            layoutRide.setVisibility(View.GONE);
-            layoutDriverDetails.setVisibility(View.VISIBLE);
-            txtViewETADuration = ((TextView) findViewById(R.id.txtViewETADuration));
-            layoutCancelRide.setVisibility(View.VISIBLE);
-            layoutSearchAddress.setVisibility(View.GONE);
-            if (TextUtils.isEmpty(rideNowDetails.ETA)) {
-                txtViewETADuration.setText("N/A");
-            } else {
-                txtViewETADuration.setText(rideNowDetails.ETA);
-            }
-            (findViewById(R.id.btnCallDriver)).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String phno = rideNowDetails.userDetails.ContactNo;
-
-                    Intent i = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phno));
-                    startActivity(i);
-                }
-            });
-        }
-    }
-
-    private void Initialize()
-    {
+    private void Initialize() {
         context = this;
         locationHelper = new LocationHelper(context);
 
-        rideNowDetails = gson.fromJson(this.getIntent().getSerializableExtra(EnumSharedPreferences.RideNowModel.toString()).toString(),RideNowModel.class);
+        rideNowDetails = gson.fromJson(this.getIntent().getSerializableExtra(EnumSharedPreferences.RideNowModel.toString()).toString(), RideNowModel.class);
         if (rideNowDetails == null) {
             rideNowDetails = new RideNowModel();
         }
@@ -584,7 +179,6 @@ public class MainActivity extends BaseAppCompatActivity
         txtSearchPlaces = (TextView) findViewById(R.id.txtSearchPlaces);
         txtRideEstimate = ((TextView) findViewById(R.id.txtViewFareEstimate));
         layoutDriverDetails = ((LinearLayout) findViewById(R.id.layoutDriverDetails));
-        layoutRide = ((LinearLayout) findViewById(R.id.layoutRide));
         layoutCancelRide = ((LinearLayout) findViewById(R.id.layoutCancelRide));
         layoutSearchAddress = ((LinearLayout) findViewById(R.id.layoutSearchAddress));
 
@@ -654,67 +248,517 @@ public class MainActivity extends BaseAppCompatActivity
 
 
     }
-}
 
-    class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
-
-        /**
-         * Global instance of the HTTP transport.
-         */
-        private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-
-        private String latlng;
-        SearchPlacesModel list;
-        String address;
-        private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
-        public AsyncResponse delegate = null;
-
-        public SearchPlacesHelper(String latlng, AsyncResponse delegate) {
-            this.latlng = latlng;
-            this.delegate = delegate;
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        try {
+            UpdateUI(rideNowDetails.RideStatus);
+            mMap = googleMap;
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            googleMap.setPadding(0, 0, 0, 450);
+            mMap.setMyLocationEnabled(true);
+        } catch (SecurityException ex) {
+            Log.d("My Location", ex.getMessage());
         }
 
-        @Override
-        protected String doInBackground(Void... params) {
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                if (locationHelper.canGetLocation()) {
+                    rideNowDetails.SourceLocation.SetLocationDetailsModel(locationHelper.getLocation());
 
-            try {
+                    if (rideNowDetails.SourceLocation.Latitude != 0 && rideNowDetails.SourceLocation.Longitude != 0) {
+                        getCabDurations(cabType, rideNowDetails.Driver.Id);
+                        if (myLocationMarker != null) {
+                            myLocationMarker.remove();
+                        }
+                        final LatLng latlng
+                                = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
 
-                HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
-                HttpRequest request = httpRequestFactory
-                        .buildGetRequest(new GenericUrl(API_URL));
-                request.getUrl().put("key", "AIzaSyAM6e58t0Fe-D4zAy6JeHOQ__YjA5BErog");
-                request.getUrl().put("latlng", latlng);
-
-                String s = request.execute().parseAsString();
-
-                Gson gson = new Gson();
-                list = gson.fromJson(s, SearchPlacesModel.class);
-                address = list.results.get(0).formatted_address;
-            } catch (Exception e) {
-                Log.e("Error:", e.getMessage());
-                //    return null;
-            }
-            return address;
-        }
-        @Override
-        protected void onPostExecute(String result) {
-            delegate.processFinish(result);
-        }
-
-        /**
-         * Creating http request Factory
-         */
-        public static HttpRequestFactory createRequestFactory(
-                final HttpTransport transport) {
-            return transport.createRequestFactory(new HttpRequestInitializer() {
-                public void initialize(HttpRequest request) {
-                    GoogleHeaders headers = new GoogleHeaders();
-                    headers.setApplicationName("AndroidHive-Places-Test");
-                    request.setHeaders(headers);
-                    JsonHttpParser parser = new JsonHttpParser(new JacksonFactory());
-                    request.addParser(parser);
+                        myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+                        myLocationMarker.setVisible(true);
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+                        mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
+                    }
+                    new SearchPlacesHelper(Double.toString(locationHelper.getLatitude()) + "," + Double.toString(locationHelper.getLongitude()), new AsyncResponse() {
+                        @Override
+                        public void processFinish(String response) {
+                            rideNowDetails.SourceLocation.Address = response;
+                            txtSearchPlaces.setText(response);
+                        }
+                    }).execute();
                 }
-            });
+                return false;
+            }
+        });
+
+        if (locationHelper.canGetLocation()) {
+            if (rideNowDetails.SourceLocation.Latitude == 0) {
+                rideNowDetails.SourceLocation.SetLocationDetailsModel(locationHelper.getLocation());
+            }
+
+            if (rideNowDetails.SourceLocation.Latitude != 0) {
+                UpdateCabDurations("Mini");
+                final LatLng latlng
+                        = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
+
+                new SearchPlacesHelper(Double.toString(locationHelper.getLatitude()) + "," + Double.toString(locationHelper.getLongitude()), new AsyncResponse() {
+                    @Override
+                    public void processFinish(String response) {
+                        rideNowDetails.SourceLocation.Address = response;
+                        txtSearchPlaces.setText(response);
+                    }
+                }).execute();
+
+                if (myLocationMarker != null) {
+                    myLocationMarker.remove();
+                }
+                myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+                myLocationMarker.setVisible(true);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+                mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
+            }
+        }
+    }
+
+    public void UpdateUI(int rideStatus) {
+        switch (rideStatus) {
+
+            case 1:
+                CheckInternetConnectivity();
+                layoutImageView.setVisibility(View.VISIBLE);
+                layoutDriverDetails.setVisibility(View.GONE);
+                layoutCancelRide.setVisibility(View.GONE);
+                layoutSearchAddress.setVisibility(View.VISIBLE);
+                break;
+
+            case 2:
+                noConnectionHandler.removeCallbacks(noConnectionRunnable);
+                layoutImageView.setVisibility(View.GONE);
+                layoutDriverDetails.setVisibility(View.VISIBLE);
+                txtViewETADuration = ((TextView) findViewById(R.id.txtViewETADuration));
+                layoutCancelRide.setVisibility(View.VISIBLE);
+                layoutSearchAddress.setVisibility(View.GONE);
+
+                txtViewDriverName = (TextView)findViewById(R.id.txtViewDriverName);
+                txtViewCarName = (TextView)findViewById(R.id.txtViewCarName);
+                txtViewCarNumber = (TextView)findViewById(R.id.txtViewCarNumber);
+                txtViewDriverRatingCount = (TextView)findViewById(R.id.txtViewDriverRatingCount);
+                driverRatingBar = (RatingBar)findViewById(R.id.driverRatingBar);
+
+                txtViewDriverName.setText(rideNowDetails.Driver.FirstName + " " + rideNowDetails.Driver.LastName);
+                txtViewCarName.setText(rideNowDetails.Driver.Car.Color + " " + rideNowDetails.Driver.Car.Model);
+                txtViewCarNumber.setText(rideNowDetails.Driver.Car.CarNumber);
+
+                if(rideNowDetails.Driver.RatingCount==0)
+                {
+                    driverRatingBar.setVisibility(View.GONE);
+                }
+                else
+                {
+                    driverRatingBar.setRating(Float.parseFloat(rideNowDetails.Driver.AverageUserRating.toString()));
+                    txtViewDriverRatingCount.setText(rideNowDetails.Driver.RatingCount + " " + "ratings");
+                    driverRatingBar.setVisibility(View.VISIBLE);
+                }
+
+                        (findViewById(R.id.btnCallDriver)).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String phno = rideNowDetails.Driver.ContactNo;
+
+                                Intent i = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phno));
+                                startActivity(i);
+                            }
+                        });
+                break;
+        }
+    }
+
+    private void UpdateCabDurations(final String cabType) {
+        try {
+            cabDurationRunnable = new Runnable() {
+                public void run() {
+                    getCabDurations(cabType, rideNowDetails.Driver.Id);
+
+                }
+            };
+            cabDurationRunnable.run();
+        } catch (Exception ex) {
+            Log.d("f", ex.getMessage());
+        }
+    }
+
+    private void getCabDurations(final String cabType, final int driverId) {
+        try {
+
+            rideNowDetails.CabType = cabType;
+
+            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.GetCabDuration);
+            APIRequestModel apiRequestModel;
+            APIResponse asyncTask;
+            List<KeyValue> keyValues;
+            final Gson gson = new Gson();
+
+            keyValues = new ArrayList<>();
+            keyValues.add(new KeyValue("latitude", Double.toString(rideNowDetails.SourceLocation.Latitude)));
+            keyValues.add(new KeyValue("longitude", Double.toString(rideNowDetails.SourceLocation.Longitude)));
+            keyValues.add(new KeyValue("driverId", Integer.toString(driverId)));
+
+            apiRequestModel = new APIRequestModel();
+            apiRequestModel.KeyValuePair = keyValues;
+            apiRequestModel.RequestUrl = requestUrl;
+            apiRequestModel.HttpVerb = "GET";
+
+            apiRequestModel.SetAuthorizationHeader = true;
+            apiRequestModel.SetOTPHeader = false;
+            apiRequestModel.DisplayProgressBar = false;
+            apiRequestModel.ProgressDialogTitle = "";
+            apiRequestModel.ProgressDialogMessage = "";
+            apiRequestModel.Response = new AsyncResponse() {
+                @Override
+                public void processFinish(String response) {
+                    UpdateUI(rideNowDetails.RideStatus);
+                    duration = gson.fromJson(response, CabDuration[].class);
+                    displayCabMarkers(duration, cabType);
+                }
+            };
+
+            asyncTask = new APIResponse(apiRequestModel);
+            asyncTask.execute();
+            cabDurationHandler.postDelayed(cabDurationRunnable, 30000);
+        } catch (Exception ex) {
+            Log.d("GetCabDurations", ex.getMessage());
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+
+        rideNowDetails = (RideNowModel) intent.getSerializableExtra(EnumSharedPreferences.RideNowModel.toString());
+        if (!TextUtils.isEmpty(rideNowDetails.SourceLocation.Address)) {
+            txtSearchPlaces.setText(rideNowDetails.SourceLocation.Address);
+        }
+
+        if (rideNowDetails.SourceLocation.Latitude != 0 && rideNowDetails.SourceLocation.Longitude != 0) {
+            getCabDurations(cabType,rideNowDetails.Driver.Id);
+            if (myLocationMarker != null) {
+                myLocationMarker.remove();
+            }
+            final LatLng latlng
+                    = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
+
+            myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+            myLocationMarker.setVisible(true);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+            mMap.animateCamera(UIHelper.getUpdateCameraPosition(latlng));
+        }
+        if (rideNowDetails.RideEstimate.TotalFare > 0) {
+            txtRideEstimate.setText("₹" + Double.toString(rideNowDetails.RideEstimate.TotalFare));
         }
 
     }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_rideNow) {
+            // Handle the camera action
+        } else if (id == R.id.nav_myRides) {
+//            setContentView(R.layout.activity_my_rides);
+
+        } else if (id == R.id.nav_emergencyContact) {
+
+        } else if (id == R.id.nav_about) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void CheckInternetConnectivity() {
+        noConnectionRunnable = new Runnable() {
+            public void run() {
+                ShowInternetConnectionSnackBar();
+            }
+        };
+        noConnectionRunnable.run();
+    }
+
+    private void ShowInternetConnectionSnackBar() {
+        try {
+            if (!new ConnectionDetector(this).execute().get()) {
+                displayCabMarkers = true;
+                if (noInternetSnackBar == null) {
+                    layoutImageView.setVisibility(View.INVISIBLE);
+                    noInternetSnackBarLayout.setVisibility(View.VISIBLE);
+                    noInternetSnackBar = createSnackBar(noInternetSnackBarLayout, "No Internet Connection", noInternetSnackBar, false);
+                }
+                if (noLocationServiceSnackBar != null) {
+                    noLocationServiceSnackBar.dismiss();
+                    noLocationSnackBarLayout.setVisibility(View.GONE);
+                    noLocationServiceSnackBar = null;
+                }
+
+            } else {
+                if (noInternetSnackBar != null) {
+                    noInternetSnackBar.dismiss();
+                    noInternetSnackBar = null;
+                    noInternetSnackBarLayout.setVisibility(View.GONE);
+                }
+                if (!locationHelper.canGetLocation()) {
+                    if (!displayCabMarkers) {
+                        if (noLocationServiceSnackBar != null) {
+                            noLocationServiceSnackBar.dismiss();
+                            noLocationSnackBarLayout.setVisibility(View.GONE);
+                            noLocationServiceSnackBar = null;
+                        }
+                    }
+                    noLocationSnackBarLayout.setVisibility(View.VISIBLE);
+                    layoutImageView.setVisibility(View.INVISIBLE);
+                    noLocationServiceSnackBar = createSnackBar(noLocationSnackBarLayout, "Enable Location Services", noLocationServiceSnackBar, true);
+                    displayCabMarkers = true;
+                } else {
+                    layoutCancelRide.setVisibility(View.GONE);
+                    layoutSearchAddress.setVisibility(View.VISIBLE);
+                    if (displayCabMarkers) {
+                        if (noLocationServiceSnackBar != null) {
+                            noLocationServiceSnackBar.dismiss();
+                            noLocationSnackBarLayout.setVisibility(View.GONE);
+                            noLocationServiceSnackBar = null;
+                        }
+                        displayCabMarkers(duration, cabType);
+                        displayCabMarkers = false;
+                    }
+                    layoutImageView.setVisibility(View.VISIBLE);
+                }
+            }
+        } catch (Exception ex) {
+            Log.d("Connection Detector", ex.getMessage());
+        }
+        noConnectionHandler.postDelayed(noConnectionRunnable, 5000);
+    }
+
+    private Snackbar createSnackBar(CoordinatorLayout layout, String messageText, Snackbar existingSnackBar, boolean includeEnableAction) {
+        Snackbar snackBar;
+        if (existingSnackBar == null) {
+            snackBar = Snackbar.make(layout, "", Snackbar.LENGTH_INDEFINITE);
+        } else {
+            snackBar = existingSnackBar;
+        }
+
+        if (includeEnableAction) {
+            snackBar.setAction("ENABLE", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                }
+            });
+        }
+        View sbView = snackBar.getView();
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setText(messageText);
+        textView.setTextColor(Color.YELLOW);
+        layout.setVisibility(View.VISIBLE);
+        snackBar.show();
+        ((android.support.design.widget.CoordinatorLayout.LayoutParams) snackBar.getView().getLayoutParams()).setBehavior(null);
+
+        return snackBar;
+    }
+
+    private void expandOrCollapse(final View v, String exp_or_colpse) {
+        TranslateAnimation anim;
+        if (exp_or_colpse.equals("expand")) {
+            anim = new TranslateAnimation(0.0f, 0.0f, -v.getHeight(), 0.0f);
+            v.setVisibility(View.VISIBLE);
+
+            anim.setDuration(750);
+            anim.setInterpolator(new AccelerateInterpolator(0.5f));
+            v.startAnimation(anim);
+        } else {
+            anim = new TranslateAnimation(0.0f, 0.0f, 0.0f, -v.getHeight());
+            Animation.AnimationListener collapselistener = new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    v.setVisibility(View.GONE);
+                }
+            };
+
+            anim.setAnimationListener(collapselistener);
+
+            anim.setDuration(750);
+            anim.setInterpolator(new AccelerateInterpolator(0.5f));
+            v.startAnimation(anim);
+        }
+    }
+
+    private void displayCabMarkers(CabDuration[] cabDurations, String cabType) {
+        this.cabType = cabType == null ? "Mini" : cabType;
+        if (cabDurations != null && cabDurations.length > 0 && !TextUtils.isEmpty(cabDurations[0].CarType)) {
+            for (CabDuration cab : cabDurations) {
+                if (cab.CarType.equals(cabType)) {
+                    mMap.clear();
+                    final LatLng latlng
+                            = new LatLng(rideNowDetails.SourceLocation.Latitude, rideNowDetails.SourceLocation.Longitude);
+                    if (myLocationMarker != null) {
+                        myLocationMarker.remove();
+                    }
+                    myLocationMarker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.fromResource(R.drawable.mylocation)));
+                    myLocationMarker.setVisible(true);
+                    for (String location : cab.Drivers) {
+                        mMap.addMarker(new MarkerOptions().position(UIHelper.GetLatLngPosition(location)).title(cab.CarType).icon(BitmapDescriptorFactory.fromResource(R.drawable.mini)));
+                    }
+
+                    switch (rideNowDetails.RideStatus) {
+                        case 1:
+                            if (cab.DurationValue != 0) {
+                                txtViewCabDuration.setText(cab.DurationText);
+                            } else {
+                                txtViewCabDuration.setText("No cabs");
+                            }
+                            break;
+                        case 2:
+                            if (cab.DurationValue != 0) {
+                                txtViewETADuration.setText(cab.DurationText);
+                            } else {
+                                txtViewETADuration.setText("N/A");
+                            }
+                            break;
+                    }
+                }
+            }
+        } else {
+            if(rideNowDetails.RideStatus==1) {
+                txtViewCabDuration.setText("No cabs");
+            }
+            else if(rideNowDetails.RideStatus==2)
+            {
+                txtViewETADuration.setText("N/A");
+            }
+        }
+    }
+
+    public void ShowConfirmation(View view) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Confirm your ride");
+        alertDialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            String requestUrl = getString(R.string.APIBaseURL) + getString(R.string.ConfirmRide);
+
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                new MapService(context, new AsyncResponse() {
+                    @Override
+                    public void processFinish(String response) {
+                        rideNowDetails = gson.fromJson(response, RideNowModel.class);
+                        UpdateUI(rideNowDetails.RideStatus);
+                    }
+                }).ConfirmRide(requestUrl, rideNowDetails);
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+}
+
+class SearchPlacesHelper extends AsyncTask<Void, Void, String> {
+
+    /**
+     * Global instance of the HTTP transport.
+     */
+    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+
+    private String latlng;
+    SearchPlacesModel list;
+    String address;
+    private static final String API_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
+    public AsyncResponse delegate = null;
+
+    public SearchPlacesHelper(String latlng, AsyncResponse delegate) {
+        this.latlng = latlng;
+        this.delegate = delegate;
+    }
+
+    @Override
+    protected String doInBackground(Void... params) {
+
+        try {
+
+            HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
+            HttpRequest request = httpRequestFactory
+                    .buildGetRequest(new GenericUrl(API_URL));
+            request.getUrl().put("key", "AIzaSyAM6e58t0Fe-D4zAy6JeHOQ__YjA5BErog");
+            request.getUrl().put("latlng", latlng);
+
+            String s = request.execute().parseAsString();
+
+            Gson gson = new Gson();
+            list = gson.fromJson(s, SearchPlacesModel.class);
+            address = list.results.get(0).formatted_address;
+        } catch (Exception e) {
+            Log.e("Error:", e.getMessage());
+            //    return null;
+        }
+        return address;
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        delegate.processFinish(result);
+    }
+
+    /**
+     * Creating http request Factory
+     */
+    public static HttpRequestFactory createRequestFactory(
+            final HttpTransport transport) {
+        return transport.createRequestFactory(new HttpRequestInitializer() {
+            public void initialize(HttpRequest request) {
+                GoogleHeaders headers = new GoogleHeaders();
+                headers.setApplicationName("AndroidHive-Places-Test");
+                request.setHeaders(headers);
+                JsonHttpParser parser = new JsonHttpParser(new JacksonFactory());
+                request.addParser(parser);
+            }
+        });
+    }
+
+}

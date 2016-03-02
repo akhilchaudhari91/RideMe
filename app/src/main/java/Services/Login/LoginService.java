@@ -40,7 +40,7 @@ public class LoginService {
         apiRequestModel.KeyValuePair.add(new KeyValue("Username",email));
         apiRequestModel.KeyValuePair.add(new KeyValue("Password",password));
 
-        apiRequestModel.SetAuthorizationHeader=true;
+        apiRequestModel.SetAuthorizationHeader=false;
         apiRequestModel.SetOTPHeader=false;
         apiRequestModel.DisplayProgressBar=true;
         apiRequestModel.ProgressDialogTitle="";

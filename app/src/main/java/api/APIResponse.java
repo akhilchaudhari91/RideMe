@@ -118,6 +118,8 @@ public class APIResponse extends AsyncTask<Void, Void, String> {
                     request.getHeaders().set("X-OTP",model.OTP);
                 }
             }
+            request.setReadTimeout(30000);
+            request.setConnectTimeout(30000);
 
             result = request.execute().parseAsString();
         } catch (Exception e) {

@@ -58,13 +58,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="right"
+                    android:visibility="gone"
                     android:id="@+id/layoutCancelRide"
                     android:weightSum="1">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="Track your ride"
-                        android:textColor="#AAAA39"
+                        android:textColor="#000000"
                         android:gravity="center"
                         android:layout_weight="1.06" />
 
